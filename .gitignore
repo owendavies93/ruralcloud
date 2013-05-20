@@ -16,3 +16,4 @@
 
 # Ignore the local database config file - hiroku doesn't want it
 config/database.yml
+db/schema.rb
