@@ -17,21 +17,46 @@
   <div class="field">
     <%= f.number_field :difficulty, :placeholder => "Difficulty (0-?)" %>
   </div>
-  <div class="field">
-    <%= f.text_area :spec, :placeholder => "Markdown Specification", :style => "width:600px;", :rows => "20" %>
+  <div class="row">
+    <div class="span6">
+      <div class="field">
+        <%= f.text_area :spec, :placeholder => "Markdown Specification", :style => "width:100%;", :rows => "20" %><br/>
+        <a class="btn" id="preview_button">Preview</a>
+      </div>
+    </div>
+    <div class="span6">
+      <blockquote id="preview-box" style="max-height:400px; overflow:auto">
+      </blockquote>
+    </div>
   </div>
-  <div class="field">
-    <%= f.label :starttime %><br />
+  <br/>
+  <div class="field" style="clear:both">
+    <%= f.label :starttime %>
     <%= f.datetime_select :starttime %>
   </div>
   <div class="field">
-    <%= f.label :endtime %><br />
+    <%= f.label :endtime %>
     <%= f.datetime_select :endtime %>
   </div>
   <div class="field">
     <%= f.hidden_field :owner, :value => sanitize(current_user.email) %>
   </div>
   <div class="actions">
-    <%= f.submit %>
+    <%= f.submit "Submit Challenge", :class => "btn" %>
   </div>
 <% end %>
+
+<!-- <script src="../assets/Markdown.Converter.js"></script>
+<script src="../assets/Markdown.Sanitizer.js"></script> -->
+
+<script type="text/javascript">
+$(document).ready(function() {
+  var $spec = $("#challenge_spec"),
+      $preview = $("#preview-box"),
+      convert = new Markdown.getSanitizingConverter().makeHtml;
+
+  $("#preview_button").click(function() {
+    $preview.html(convert($spec.val()));
+  });
+});
+</script>
