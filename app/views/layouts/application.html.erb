@@ -16,7 +16,15 @@
             <span class="icon-bar"></span>
           </a>
           <a class="brand" href="/">Rural Cloud</a>
-          <div class="nav-collapse">
+          <ul class="nav">
+            <% if user_signed_in? %>
+              <li><%= link_to "Challenges", challenges_path %></li>
+              <% if current_user.try(:admin?) %>
+                <li><%= link_to 'Create Challenge', new_challenge_path %></li>
+              <% end %>
+            <% end %>
+          </ul>
+          <div class="nav-collapse pull-right">
             <ul class="nav">
               <% if user_signed_in? %>
                 <li><a href="#">Logged in as <%= sanitize current_user.email %></a></li>

@@ -1,6 +1,10 @@
-<h1>Editing challenge</h1>
+<% if user_signed_in?
+    if current_user.try(:admin?) && @challenge.owner == current_user.email %>
+        <h1>Editing challenge</h1>
 
-<%= render 'form' %>
+        <%= render 'form' %>
 
-<%= link_to 'Show', @challenge %> |
-<%= link_to 'Back', challenges_path %>
+        <%= link_to 'Show', @challenge %> |
+        <%= link_to 'Back', challenges_path %>
+    <% end
+end %>

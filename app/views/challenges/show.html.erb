@@ -10,10 +10,19 @@
   <%= @challenge.difficulty %>
 </p>
 
+<!--
+
+THIS IS FOR MARKDOWN SHIZ, WE DON'T NEED IT HERE THOUGH
+
 <p>
   <b>Spec:</b>
-  <%= @challenge.spec %>
+  <blockquote style="max-height:500px; overflow:auto">
+    <% markdown = Redcarpet::Markdown.new(Redcarpet::Render::HTML, :autolink => true, :space_after_headers => true)
+       htm = markdown.render(@challenge.spec) %>
+    <%= htm.html_safe %>
+  </blockquote>
 </p>
+ -->
 
 <p>
   <b>Starttime:</b>

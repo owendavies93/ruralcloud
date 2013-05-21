@@ -18,6 +18,8 @@ group :assets do
   gem 'bootstrap-sass'
   gem 'coffee-rails', '~> 3.2.1'
 
+  gem 'bootstrap-datepicker-rails'
+
   # See https://github.com/sstephenson/execjs#readme for more supported runtimes
   gem 'therubyracer', :platforms => :ruby
 
@@ -25,6 +27,8 @@ group :assets do
 end
 
 gem 'jquery-rails'
+
+gem 'redcarpet'
 
 # To use ActiveModel has_secure_password
 # gem 'bcrypt-ruby', '~> 3.0.0'

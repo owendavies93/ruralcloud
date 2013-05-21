@@ -1,5 +1,7 @@
-<h1>New challenge</h1>
-
-<%= render 'form' %>
-
-<%= link_to 'Back', challenges_path %>
+<% if current_user.try(:admin?) %>
+    <h1>Create a Challenge</h1>
+    <p>Create a new coding challenge for people to participate in!</p>
+    <%= render 'form' %>
+<% else %>
+    <p>You're not an admin, you can't create challenges!</p>
+<% end %>
