@@ -1,0 +1,17 @@
+# Read about fixtures at http://api.rubyonrails.org/classes/ActiveRecord/Fixtures.html
+
+one:
+  description: MyText
+  difficulty: 1
+  spec: MyText
+  starttime: 2013-05-21 18:28:20
+  endtime: 2013-05-21 18:28:20
+  owner: MyString
+
+two:
+  description: MyText
+  difficulty: 1
+  spec: MyText
+  starttime: 2013-05-21 18:28:20
+  endtime: 2013-05-21 18:28:20
+  owner: MyString

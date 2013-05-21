@@ -1,4 +1,7 @@
 Ruralcloud::Application.routes.draw do
+  resources :challenges
+
+
   devise_for :users,
              :path => "",
              :path_names => { :sign_up  => "register",
