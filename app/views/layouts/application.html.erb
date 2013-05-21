@@ -1,24 +1,38 @@
 <!DOCTYPE html>
 <html>
-<head>
-  <title>Ruralcloud</title>
-  <%= stylesheet_link_tag    "application", :media => "all" %>
-  <%= javascript_include_tag "application" %>
-  <%= csrf_meta_tags %>
-</head>
-<body>
+  <head>
+    <title>Ruralcloud</title>
+    <%= stylesheet_link_tag    "application", :media => "all" %>
+    <%= javascript_include_tag "application" %>
+    <%= csrf_meta_tags %>
+  </head>
 
-<div id="nav">
-  <a href="/">Home</a> |
-  <% if user_signed_in? %>
-    Logged in as <%= sanitize current_user.email %>.
-    <%= link_to "Logout", destroy_user_session_path %>
-  <% else %>
-    <%= link_to "Login", new_user_session_path %> | <%= link_to "Sign up", new_user_registration_path %>
-  <% end %>
-</div>
-<div id="container">
-  <%= yield %>
-</div>
-</body>
+  <body>
+    <div class="navbar navbar-fixed-top">
+      <div class="navbar-inner">
+        <div class="container">
+          <a class="btn btn-navbar" data-toggle="collapse" data-target=".nav-collapse">
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+          </a>
+          <a class="brand" href="/">Rural Cloud</a>
+          <div class="nav-collapse">
+            <ul class="nav">
+              <% if user_signed_in? %>
+                <li><a href="#">Logged in as <%= sanitize current_user.email %></a></li>
+                <li><%= link_to "Logout", destroy_user_session_path %></li>
+              <% else %>
+                <li><%= link_to "Login", new_user_session_path %></li>
+                <li><%= link_to "Sign up", new_user_registration_path %></li>
+              <% end %>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="container">
+      <%= yield %>
+    </div>
+  </body>
 </html>
