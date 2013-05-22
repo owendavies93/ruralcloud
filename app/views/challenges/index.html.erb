@@ -8,8 +8,10 @@
     <th>End time</th>
     <th>Owner</th>
     <th></th>
-    <th></th>
-    <th></th>
+    <% if current_user.try(:admin?) %>
+        <th></th>
+        <th></th>
+    <% end %>
   </tr>
 
 <% @challenges.each do |challenge| %>
@@ -20,8 +22,10 @@
     <td><%= challenge.endtime %></td>
     <td><%= challenge.owner %></td>
     <td><%= link_to 'Show', challenge, :class => "btn btn-small" %></td>
-    <td><%= link_to 'Edit', edit_challenge_path(challenge), :class => "btn btn-small" %></td>
-    <td><%= link_to 'Destroy', challenge, method: :delete, :class => "btn btn-danger btn-small" , data: { confirm: 'Are you sure?' } %></td>
+    <% if current_user.try(:admin?) %>
+        <td><%= link_to 'Edit', edit_challenge_path(challenge), :class => "btn btn-small" %></td>
+        <td><%= link_to 'Destroy', challenge, method: :delete, :class => "btn btn-danger btn-small" , data: { confirm: 'Are you sure?' } %></td>
+    <% end %>
   </tr>
 <% end %>
 </table>
