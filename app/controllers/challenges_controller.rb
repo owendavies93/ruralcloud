@@ -109,4 +109,12 @@ class ChallengesController < ApplicationController
   end
   helper_method :has_started
 
+  private
+  def has_ended challenge
+    now = Time.new
+
+    return challenge.endtime < now.inspect
+  end
+  helper_method :has_ended
+
 end

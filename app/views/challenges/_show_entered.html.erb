@@ -1,20 +1,24 @@
-<% started = has_started(@challenge) %>
+<% started = has_started(@challenge)
+   ended = has_ended(@challenge) %>
 <div class="info">
   <% if !started %>
     <p>This challenge starts in:</p>
+  <% elsif !ended %>
+    <div id="start-countdown"></div>
+  <% else %>
+    <p>This challenge has ended!</P>
   <% end %>
-  <div id="start-countdown"></div>
 </div>
 
 <div class="container-fluid">
   <div class="row-fluid">
-    <div class="span6 codewrapper">
-      <textarea <% started ? "" : "disabled" %> rows="30" id="editor" placeholder="Editor"></textarea>
-    <a id="compile-button" class="btn btn-primary" <% started ? "" : "disabled" %>>Compile</a>
+    <div class="span6">
+      <textarea disabled rows="30" id="editor" placeholder="Editor"></textarea>
+    <a id="compile-button" class="btn btn-primary" <% started && !ended ? "" : "disabled" %>>Compile</a>
     </div>
     <div class="span6">
       <div class="row-fluid codewrapper">
-        <textarea <% started ? "" : "disabled" %> rows="15" id="console">$ </textarea>
+        <textarea <% started && !ended ? "" : "disabled" %> rows="15" id="console">$ </textarea>
       </div>
       <div class="row-fluid" id="spec">
         <blockquote style="max-height:500px; overflow:auto">
@@ -53,9 +57,14 @@
 <% if !started %>
   var starttime = new Date(<%= DateTime.strptime(@challenge.starttime.to_s,"%m-%d-%Y %H:%M").to_i %> * 1000);
   $("#start-countdown").countdown({until: starttime});
-<% else %>
+<% elsif !ended %>
   var endtime = new Date(<%= DateTime.strptime(@challenge.endtime.to_s,"%m-%d-%Y %H:%M").to_i %> * 1000);
   $("#start-countdown").countdown({until: endtime});
+
+  var myCodeMirror = CodeMirror.fromTextArea(editor, {
+      mode: "haskell",
+      lineNumbers: true
+    });
 <% end %>
 
 /*
