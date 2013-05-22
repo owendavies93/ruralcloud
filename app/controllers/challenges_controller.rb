@@ -80,4 +80,13 @@ class ChallengesController < ApplicationController
       format.json { head :no_content }
     end
   end
+
+  # Enters the current user into the challenge
+  def enter
+      @challenge = Challenge.find(params[:id])
+
+      current_user.update_attribute(:challenge_id, @challenge.id)
+      @challenge.users << current_user
+      redirect_to :back
+  end
 end

@@ -10,7 +10,9 @@
   <%= @challenge.difficulty %>
 </p>
 
+<!--
 
+THIS IS FOR MARKDOWN SHIZ, WE DON'T NEED IT HERE THOUGH
 
 <p>
   <b>Spec:</b>
@@ -20,15 +22,15 @@
     <%= htm.html_safe %>
   </blockquote>
 </p>
-
+ -->
 
 <p>
-  <b>Starttime:</b>
+  <b>Start time:</b>
   <%= @challenge.starttime %>
 </p>
 
 <p>
-  <b>Endtime:</b>
+  <b>End time:</b>
   <%= @challenge.endtime %>
 </p>
 
@@ -37,6 +39,8 @@
   <%= @challenge.owner %>
 </p>
 
-
-<%= link_to 'Edit', edit_challenge_path(@challenge) %> |
-<%= link_to 'Back', challenges_path %>
+<% if current_user.email == @challenge.owner %>
+  <%= link_to 'Edit', edit_challenge_path(@challenge), :class => "btn" %>
+<% else %>
+  <%= link_to 'Enter Challenge', enter_challenge_path, :class => "btn" %>
+<% end %>
