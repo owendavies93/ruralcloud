@@ -5,5 +5,5 @@ require File.expand_path('../application', __FILE__)
 Ruralcloud::Application.initialize!
 
 # Custom dt formats for removal of UTC and UK format
-Date::DATE_FORMATS[:default] = "%d-%m-%Y"
-Time::DATE_FORMATS[:default] = "%d-%m-%Y %H:%M:%S"
+Date::DATE_FORMATS[:default] = "%m-%d-%Y"
+Time::DATE_FORMATS[:default] = "%m-%d-%Y %H:%M:%S"

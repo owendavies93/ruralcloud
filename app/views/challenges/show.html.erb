@@ -1,46 +1,92 @@
 <p id="notice"><%= notice %></p>
 
-<p>
-  <b>Description:</b>
-  <%= @challenge.description %>
-</p>
+<% if is_entered(@challenge) %>
 
-<p>
-  <b>Difficulty:</b>
-  <%= @challenge.difficulty %>
-</p>
+  <% if !has_started(@challenge) %>
+    <div class="info">
+      <p>This challenge starts in:</p>
+      <div id="start-countdown"></div>
+    </div>
+  <% end %>
 
-<!--
+  <div class="container-fluid">
+    <div class="row-fluid">
+      <div class="span6 codewrapper">
+        <textarea disabled="true" rows="30" id="editor" placeholder="Editor"></textarea>
+      <a id="compile-button" class="btn btn-primary" disabled="true">Compile</a>
+      </div>
+      <div class="span6">
+        <div class="row-fluid codewrapper">
+          <textarea disabled="true" rows="15" id="console" placeholder="$>"></textarea>
+        </div>
+        <div class="row-fluid" id="spec">
+          <blockquote style="max-height:500px; overflow:auto">
+            <h3>Challenge #<%= @challenge.id %></h3>
+            <!--
+            <% markdown = Redcarpet::Markdown.new(Redcarpet::Render::HTML, :autolink => true, :space_after_headers => true)
+               htm = markdown.render(@challenge.spec) %>
+            <%= htm.html_safe %>
+             -->
+            <p>
+              <b>Description:</b>
+              <%= @challenge.description %>
+            </p>
 
-THIS IS FOR MARKDOWN SHIZ, WE DON'T NEED IT HERE THOUGH
+            <p>
+              <b>Difficulty:</b>
+              <%= @challenge.difficulty %>
+            </p>
 
-<p>
-  <b>Spec:</b>
-  <blockquote style="max-height:500px; overflow:auto">
-    <% markdown = Redcarpet::Markdown.new(Redcarpet::Render::HTML, :autolink => true, :space_after_headers => true)
-       htm = markdown.render(@challenge.spec) %>
-    <%= htm.html_safe %>
-  </blockquote>
-</p>
- -->
+            <p>
+              <b>Owner:</b>
+              <%= @challenge.owner %>
+            </p>
 
-<p>
-  <b>Start time:</b>
-  <%= @challenge.starttime %>
-</p>
+            <p>The specification for this challenge will appear here once the challenge has started.</p>
+          </blockquote>
+        </div>
+      </div>
+    </div>
+  </div>
 
-<p>
-  <b>End time:</b>
-  <%= @challenge.endtime %>
-</p>
-
-<p>
-  <b>Owner:</b>
-  <%= @challenge.owner %>
-</p>
-
-<% if current_user.email == @challenge.owner %>
-  <%= link_to 'Edit', edit_challenge_path(@challenge), :class => "btn" %>
 <% else %>
-  <%= link_to 'Enter Challenge', enter_challenge_path, :class => "btn" %>
+
+  <p>
+    <b>Description:</b>
+    <%= @challenge.description %>
+  </p>
+
+  <p>
+    <b>Difficulty:</b>
+    <%= @challenge.difficulty %>
+  </p>
+
+  <p>
+    <b>Start time:</b>
+    <%= @challenge.starttime %>
+  </p>
+
+  <p>
+    <b>End time:</b>
+    <%= @challenge.endtime %>
+  </p>
+
+  <p>
+    <b>Owner:</b>
+    <%= @challenge.owner %>
+  </p>
+
+  <% if current_user.email == @challenge.owner %>
+    <%= link_to 'Edit', edit_challenge_path(@challenge), :class => "btn" %>
+  <% else %>
+    <%= link_to 'Enter Challenge', enter_challenge_path, :class => "btn" %>
+  <% end %>
+
 <% end %>
+
+<script type="text/javascript">
+
+var starttime = new Date(<%= DateTime.strptime(@challenge.starttime.to_s,"%m-%d-%Y %H:%M").to_i %> * 1000);
+$("#start-countdown").countdown({until: starttime});
+
+</script>

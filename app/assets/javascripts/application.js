@@ -15,3 +15,4 @@
 //= require bootstrap
 //= require Markdown.Converter
 //= require Markdown.Sanitizer
+//= require jquery.countdown.min

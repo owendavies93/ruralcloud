@@ -83,10 +83,30 @@ class ChallengesController < ApplicationController
 
   # Enters the current user into the challenge
   def enter
-      @challenge = Challenge.find(params[:id])
+    @challenge = Challenge.find(params[:id])
 
-      current_user.update_attribute(:challenge_id, @challenge.id)
-      @challenge.users << current_user
-      redirect_to :back
+    current_user.update_attribute(:challenge_id, @challenge.id)
+    @challenge.users << current_user
+    redirect_to :back, :notice => "You have entered this challenge!"
   end
+
+  private
+  def is_entered challenge
+    challenge.users.each { |u|
+      if u.email == current_user.email
+        return true
+      end
+    }
+    return false
+  end
+  helper_method :is_entered
+
+  private
+  def has_started challenge
+    now = Time.new
+
+    return challenge.starttime < now.inspect
+  end
+  helper_method :has_started
+
 end
