@@ -16,3 +16,5 @@
 //= require Markdown.Converter
 //= require Markdown.Sanitizer
 //= require jquery.countdown.min
+//= require codemirror
+//= require haskell
