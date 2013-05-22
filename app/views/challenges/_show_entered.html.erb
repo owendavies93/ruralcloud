@@ -13,7 +13,7 @@
 <div class="container-fluid">
   <div class="row-fluid">
     <div class="span6">
-      <textarea disabled rows="30" id="editor" placeholder="Editor"></textarea>
+      <textarea rows="30" id="editor" placeholder=""></textarea>
     <a id="compile-button" class="btn btn-primary" <% started && !ended ? "" : "disabled" %>>Compile</a>
     </div>
     <div class="span6">
@@ -60,12 +60,14 @@
 <% elsif !ended %>
   var endtime = new Date(<%= DateTime.strptime(@challenge.endtime.to_s,"%m-%d-%Y %H:%M").to_i %> * 1000);
   $("#start-countdown").countdown({until: endtime});
+<% end %>
 
   var myCodeMirror = CodeMirror.fromTextArea(editor, {
       mode: "haskell",
-      lineNumbers: true
+      lineNumbers: true,
+      tabSize: 2,
+      readOnly: "<%= started && !ended ? "" : "nocursor" %>"
     });
-<% end %>
 
 /*
 var now = new Date();
