@@ -72,20 +72,70 @@
       readOnly: "<%= started && !ended ? "" : "nocursor" %>"
     });
 
-  var console = CodeMirror.fromTextArea(document.getElementById('console'), {
-      mode: "shell",
-      extraKeys: {
-        Enter: function(console) {
+  var used = new Array();
+  var currentline = 0;
 
-        }}
+  var co = CodeMirror.fromTextArea(document.getElementById('console'), {
+      mode: "shell",
+      readOnly: "<%= started && !ended ? "" : "nocursor" %>",
+      extraKeys: {
+        Enter: function(co) {
+          // Send to server, get back result
+          co.setCursor({line: co.getCursor().line});
+          co.replaceSelection("\n", "end", "+input");
+          co.setLine(co.lineCount() - 1, "You typed " + co.getLine(co.lineCount() - 2));
+          co.replaceSelection("\n", "end", "+input");
+          used.push(co.lineCount() - 2);
+          used.push(co.lineCount() - 3);
+          currentline = co.getCursor().line;
+        },
+
+        // Intercept backspace and delete to stop old command deletion
+        Backspace: function(co) {
+          var cur = co.getCursor().line;
+          console.log(cur);
+          console.log(used);
+          console.log($.inArray(cur, used));
+          console.log(getCurLineLen(co));
+          if ($.inArray(cur, used) == -1 && getCurLineLen(co) > 0) {
+            co.deleteH(-1, "char");
+          }
+        },
+        Delete: function(co) {
+          var cur = co.getCursor().line;
+          if ($.inArray(cur, used) == -1 && getCurLineLen(co) > 0) {
+            co.deleteH(1, "char");
+          }
+        },
+
+        // Use up and down for command history
+        Up: function(co) {
+          var cur = co.getCursor().line;
+          if (currentline > 1) {
+            co.setLine(cur, co.getLine(currentline - 2));
+            currentline -= 2;
+          }
+        },
+        Down: function(co) {
+          var cur = co.getCursor().line;
+          if (currentline < cur - 1) {
+            co.setLine(cur, co.getLine(currentline + 2));
+            currentline += 2;
+          }
+        }
+      }
     });
 
-  console.setSize(null, 300);
+  co.setSize(null, 300);
 
   $("#compile-button").click(function(){
-    console.log(editor.getValue());
+    // Send to server, get back result
+    co.setLine(co.lineCount()-1, "Compiled...\nCompiled");
+    co.replaceSelection("\n", "end", "+input");
   });
 
-<% end %>
+  function getCurLineLen(cm) {
+    return cm.getLine(cm.getCursor().line).length
+  };
 
 </script>
