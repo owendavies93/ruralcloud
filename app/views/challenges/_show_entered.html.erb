@@ -18,7 +18,7 @@
     </div>
     <div class="span6">
       <div class="row-fluid codewrapper">
-        <textarea <% started && !ended ? "" : "disabled" %> rows="15" id="console"></textarea>
+        <textarea <% started && !ended ? "" : "disabled" %> rows="15" id="console">$> </textarea>
       </div>
       <div class="row-fluid" id="spec">
         <blockquote style="max-height:500px; overflow:auto">
@@ -73,37 +73,43 @@
     });
 
   var used = new Array();
+  var history = new Array();
   var currentline = 0;
+  var prompt = "$> "
 
   var co = CodeMirror.fromTextArea(document.getElementById('console'), {
       mode: "shell",
       readOnly: "<%= started && !ended ? "" : "nocursor" %>",
       extraKeys: {
         Enter: function(co) {
-          // Send to server, get back result
           co.setCursor({line: co.getCursor().line});
           co.replaceSelection("\n", "end", "+input");
-          co.setLine(co.lineCount() - 1, "You typed " + co.getLine(co.lineCount() - 2));
-          co.replaceSelection("\n", "end", "+input");
+
+          var cmd = co.getLine(co.lineCount() - 2).substring(3);
+          // Send cmd to server, get back result
+
+          co.setLine(co.lineCount() - 1, "You typed " + cmd);
+          co.replaceSelection("\n" + prompt, "end", "+input");
+          // 'Mark' lines as uneditable
           used.push(co.lineCount() - 2);
           used.push(co.lineCount() - 3);
-          currentline = co.getCursor().line;
+
+          // Add cmd to history
+          history.push(cmd);
+          currentline++;
+          console.log(history);
         },
 
         // Intercept backspace and delete to stop old command deletion
         Backspace: function(co) {
           var cur = co.getCursor().line;
-          console.log(cur);
-          console.log(used);
-          console.log($.inArray(cur, used));
-          console.log(getCurLineLen(co));
-          if ($.inArray(cur, used) == -1 && getCurLineLen(co) > 0) {
+          if ($.inArray(cur, used) == -1 && getCurLineLen(co) > 3) {
             co.deleteH(-1, "char");
           }
         },
         Delete: function(co) {
           var cur = co.getCursor().line;
-          if ($.inArray(cur, used) == -1 && getCurLineLen(co) > 0) {
+          if ($.inArray(cur, used) == -1 && getCurLineLen(co) > 3) {
             co.deleteH(1, "char");
           }
         },
@@ -111,16 +117,18 @@
         // Use up and down for command history
         Up: function(co) {
           var cur = co.getCursor().line;
-          if (currentline > 1) {
-            co.setLine(cur, co.getLine(currentline - 2));
-            currentline -= 2;
+          if (currentline > 0) {
+            co.setLine(cur, prompt + history[--currentline]);
           }
         },
         Down: function(co) {
           var cur = co.getCursor().line;
-          if (currentline < cur - 1) {
-            co.setLine(cur, co.getLine(currentline + 2));
-            currentline += 2;
+          console.log(cur);
+          console.log(currentline);
+          if (currentline < history.length - 1) {
+            co.setLine(cur, prompt + history[++currentline]);
+          } else {
+            co.setLine(cur, prompt);
           }
         }
       }
@@ -130,8 +138,8 @@
 
   $("#compile-button").click(function(){
     // Send to server, get back result
-    co.setLine(co.lineCount()-1, "Compiled...\nCompiled");
-    co.replaceSelection("\n", "end", "+input");
+    co.setLine(co.lineCount()-1, "Compiled");
+    co.replaceSelection("\n" + prompt, "end", "+input");
   });
 
   function getCurLineLen(cm) {
