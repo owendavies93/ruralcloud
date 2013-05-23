@@ -1,30 +1,62 @@
-<p>
-  <b>Description:</b>
-  <%= @challenge.description %>
-</p>
+<% started = has_started(@challenge)
+   ended = has_ended(@challenge) %>
 
-<p>
-  <b>Difficulty:</b>
-  <%= @challenge.difficulty %>
-</p>
-
-<p>
-  <b>Start time:</b>
-  <%= @challenge.starttime %>
-</p>
-
-<p>
-  <b>End time:</b>
-  <%= @challenge.endtime %>
-</p>
-
-<p>
-  <b>Owner:</b>
-  <%= @challenge.owner %>
-</p>
-
-<% if current_user.email == @challenge.owner %>
-  <%= link_to 'Edit', edit_challenge_path(@challenge), :class => "btn" %>
-<% else %>
-  <%= link_to 'Enter Challenge', enter_challenge_path, :class => "btn" %>
+<h2>Challenge #<%= @challenge.id %></h2>
+<% if started %>
+  <p>Administration Panel</p>
 <% end %>
+<div class="row-fluid">
+<div class="span4">
+
+  <dl class="dl-horizontal">
+    <dt>Description:</dt>
+    <dd><%= @challenge.description %></dd>
+    <dt>Difficulty:</dt>
+    <dd><%= @challenge.difficulty %></dd>
+    <dt>Start time:</dt>
+    <dd><%= @challenge.starttime %>
+        <% if started && !ended %><br/>This challenge has started!<% end %></dd>
+    <dt>End time:</dt>
+    <dd><%= @challenge.endtime %>
+        <% if ended %><br/>This challenge has ended.<% end %></dd>
+    <dt>Owner:</dt>
+    <dd><%= @challenge.owner %></dd>
+  </dl>
+
+<% if user_signed_in? %>
+  <% if current_user.email == @challenge.owner && !started %>
+    <%= link_to 'Edit', edit_challenge_path(@challenge), :class => "btn" %>
+  <% elsif !started %>
+    <%= link_to 'Enter Challenge', enter_challenge_path, :class => "btn" %>
+  <% else %>
+    <div id="start-countdown"></div>
+  <% end %>
+<% else %>
+  <p>Sign in to enter this challenge!</p>
+<% end %>
+
+</div>
+
+<% if started %>
+  <div class="span4 well well-small log">
+    Log - TODO
+  </div>
+  <div class="span4 log">
+    <h4>Entrants:</h4>
+    <% if not @challenge.users.blank? %>
+      <ul>
+      <% for user in @challenge.users %>
+        <li><%= sanitize user.email %></li>
+      <% end %>
+      </ul>
+    <% else %>
+      There are no entrants. Sorry!
+    <% end %>
+  </div>
+<% end %>
+</div>
+
+<script type="text/javascript">
+  var endtime = new Date(<%= DateTime.strptime(@challenge.endtime.to_s,"%m-%d-%Y %H:%M").to_i %> * 1000);
+  $("#start-countdown").countdown({until: endtime});
+</script>

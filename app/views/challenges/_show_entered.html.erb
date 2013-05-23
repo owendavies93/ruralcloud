@@ -3,6 +3,7 @@
 <div class="info">
   <% if !started %>
     <p>This challenge starts in:</p>
+    <div id="start-countdown"></div>
   <% elsif !ended %>
     <div id="start-countdown"></div>
   <% else %>
@@ -63,87 +64,30 @@
 
   var endtime = new Date(<%= DateTime.strptime(@challenge.endtime.to_s,"%m-%d-%Y %H:%M").to_i %> * 1000);
   $("#start-countdown").countdown({until: endtime});
+
 <% end %>
 
   var editor = CodeMirror.fromTextArea(document.getElementById('editor'), {
       mode: "haskell",
       lineNumbers: true,
       tabSize: 2,
-      readOnly: "<%= started && !ended ? "" : "nocursor" %>"
+      readOnly: "<%= started && !ended ? "" : "nocursor" %>",
+      theme: "<%= current_user.editor_theme %>"
     });
-
-  var used = new Array();
-  var history = new Array();
-  var currentline = 0;
-  var prompt = "$> "
 
   var co = CodeMirror.fromTextArea(document.getElementById('console'), {
       mode: "shell",
       readOnly: "<%= started && !ended ? "" : "nocursor" %>",
-      extraKeys: {
-        Enter: function(co) {
-          co.setCursor({line: co.getCursor().line});
-          co.replaceSelection("\n", "end", "+input");
-
-          var cmd = co.getLine(co.lineCount() - 2).substring(3);
-          // Send cmd to server, get back result
-
-          co.setLine(co.lineCount() - 1, "You typed " + cmd);
-          co.replaceSelection("\n" + prompt, "end", "+input");
-          // 'Mark' lines as uneditable
-          used.push(co.lineCount() - 2);
-          used.push(co.lineCount() - 3);
-
-          // Add cmd to history
-          history.push(cmd);
-          currentline++;
-          console.log(history);
-        },
-
-        // Intercept backspace and delete to stop old command deletion
-        Backspace: function(co) {
-          var cur = co.getCursor().line;
-          if ($.inArray(cur, used) == -1 && getCurLineLen(co) > 3) {
-            co.deleteH(-1, "char");
-          }
-        },
-        Delete: function(co) {
-          var cur = co.getCursor().line;
-          if ($.inArray(cur, used) == -1 && getCurLineLen(co) > 3) {
-            co.deleteH(1, "char");
-          }
-        },
-
-        // Use up and down for command history
-        Up: function(co) {
-          var cur = co.getCursor().line;
-          if (currentline > 0) {
-            co.setLine(cur, prompt + history[--currentline]);
-          }
-        },
-        Down: function(co) {
-          var cur = co.getCursor().line;
-          console.log(cur);
-          console.log(currentline);
-          if (currentline < history.length - 1) {
-            co.setLine(cur, prompt + history[++currentline]);
-          } else {
-            co.setLine(cur, prompt);
-          }
-        }
-      }
+      dragDrop: false,
+      keyMap: "conmap"
     });
 
   co.setSize(null, 300);
 
   $("#compile-button").click(function(){
-    // Send to server, get back result
+    // This just sets the last line of the console
     co.setLine(co.lineCount()-1, "Compiled");
     co.replaceSelection("\n" + prompt, "end", "+input");
   });
-
-  function getCurLineLen(cm) {
-    return cm.getLine(cm.getCursor().line).length
-  };
 
 </script>

@@ -1,8 +1,9 @@
 /* BASICS */
 
 .CodeMirror {
-  line-height: 1.3em;
-  font-family: Monaco, Menlo, Consolas, "Courier New", monospace;
+  line-height: 1.5em;
+  font-size: 12pt;
+  font-family: 'Inconsolata', Monaco, Menlo, Consolas, "Courier New", monospace;
   background-color: white;
 
   /* Copied from Bootstrap's textarea */
@@ -103,7 +104,7 @@
 .cm-s-default .cm-string {color: #BC670F;}
 .cm-s-default .cm-string-2 {color: #E69A4C;}
 .cm-s-default .cm-meta {color: #7653C1;}
-.cm-s-default .cm-error {color: #D4430D;}
+.cm-s-default .cm-error {color: #D4430D; font-weight: bold;}
 .cm-s-default .cm-qualifier {color: #7653C1;}
 .cm-s-default .cm-builtin {color: #7653C1;}
 .cm-s-default .cm-bracket {color: #2F6F9F;}
