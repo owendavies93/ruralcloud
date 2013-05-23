@@ -3,6 +3,7 @@
 <div class="info">
   <% if !started %>
     <p>This challenge starts in:</p>
+    <div id="start-countdown"></div>
   <% elsif !ended %>
     <div id="start-countdown"></div>
   <% else %>
@@ -18,7 +19,7 @@
     </div>
     <div class="span6">
       <div class="row-fluid codewrapper">
-        <textarea <% started && !ended ? "" : "disabled" %> rows="15" id="console">$ </textarea>
+        <textarea <% started && !ended ? "" : "disabled" %> rows="15" id="console">$> </textarea>
       </div>
       <div class="row-fluid" id="spec">
         <blockquote style="max-height:500px; overflow:auto">
@@ -55,27 +56,38 @@
 <script type="text/javascript">
 
 <% if !started %>
+
   var starttime = new Date(<%= DateTime.strptime(@challenge.starttime.to_s,"%m-%d-%Y %H:%M").to_i %> * 1000);
   $("#start-countdown").countdown({until: starttime});
+
 <% elsif !ended %>
+
   var endtime = new Date(<%= DateTime.strptime(@challenge.endtime.to_s,"%m-%d-%Y %H:%M").to_i %> * 1000);
   $("#start-countdown").countdown({until: endtime});
+
 <% end %>
 
-  var myCodeMirror = CodeMirror.fromTextArea(editor, {
+  var editor = CodeMirror.fromTextArea(document.getElementById('editor'), {
       mode: "haskell",
       lineNumbers: true,
       tabSize: 2,
-      readOnly: "<%= started && !ended ? "" : "nocursor" %>"
+      readOnly: "<%= started && !ended ? "" : "nocursor" %>",
+      theme: "<%= current_user.editor_theme %>"
     });
 
-/*
-var now = new Date();
-var timetogo = starttime - now;
+  var co = CodeMirror.fromTextArea(document.getElementById('console'), {
+      mode: "shell",
+      readOnly: "<%= started && !ended ? "" : "nocursor" %>",
+      dragDrop: false,
+      keyMap: "conmap"
+    });
 
-if (timetogo > 0) {
-  setTimeout(function(){location.reload()}, timetogo);
-}
-*/
+  co.setSize(null, 300);
+
+  $("#compile-button").click(function(){
+    // This just sets the last line of the console
+    co.setLine(co.lineCount()-1, "Compiled");
+    co.replaceSelection("\n" + prompt, "end", "+input");
+  });
 
 </script>

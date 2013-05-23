@@ -1,29 +1,66 @@
-<h2>Edit <%= resource_name.to_s.humanize %></h2>
+<h2>Account Settings</h2>
 
 <%= form_for(resource, :as => resource_name, :url => registration_path(resource_name), :html => { :method => :put }) do |f| %>
   <%= devise_error_messages! %>
+  <div class="row-fluid">
+    <div class="span12">
+      <div>Avatar:<br/>
+      <%= image_tag gravatar(current_user) %><br/>
+      Go to <a href="http://gravatar.com">Gravatar</a> to change your avatar.</div>
+    </div>
+  </div>
+  <div class="row-fluid">
+    <div class="span6">
+      <h3>Preferences</h3>
+      <div>Editor theme:<br/>
+      <%= f.select :editor_theme, [['default','default'],['blackboard','blackboard'],['eclipse','eclipse'],['monokai','monokai']], {}, :onchange => "selectTheme()" %></div>
 
-  <div><%= f.label :email %><br />
-  <%= f.email_field :email, :autofocus => true %></div>
+      <div>Editor commands:<br/>
+      <%= f.select :mapping_preference, [['none', 'none'],['vim', 'vim'],['emacs','emacs']] %></div>
 
-  <% if devise_mapping.confirmable? && resource.pending_reconfirmation? %>
-    <div>Currently waiting confirmation for: <%= resource.unconfirmed_email %></div>
-  <% end %>
+      <h3>Password</h3>
+      <div><i>Leave the password fields blank to keep your current password</i><br />
+      <%= f.password_field :password, :autocomplete => "off", :placeholder => "New Password" %></div>
 
-  <div><%= f.label :password %> <i>(leave blank if you don't want to change it)</i><br />
-  <%= f.password_field :password, :autocomplete => "off" %></div>
+      <div><%= f.password_field :password_confirmation, :placeholder => "New Password Again" %></div>
 
-  <div><%= f.label :password_confirmation %><br />
-  <%= f.password_field :password_confirmation %></div>
+      <div><i>Confirm changes with current password:</i><br />
+      <%= f.password_field :current_password , :placeholder => "Password" %></div>
 
-  <div><%= f.label :current_password %> <i>(we need your current password to confirm your changes)</i><br />
-  <%= f.password_field :current_password %></div>
-
-  <div><%= f.submit "Update" %></div>
+      <div><%= f.submit "Update Settings", :class => "btn" %></div>
+    </div>
+    <div class="span6">
+      <br/><br/><br/>
+      <textarea id="code-preview">
+quicksort :: (Ord a) => [a] -> [a]
+quicksort [] = []
+quicksort (x:xs) =
+    let smallerSorted = quicksort [a | a <- xs, a <= x]
+        biggerSorted = quicksort [a | a <- xs, a > x]
+    in  smallerSorted ++ [x] ++ biggerSorted
+      </textarea>
+    </div>
+  </div>
 <% end %>
 
-<h3>Cancel my account</h3>
 
-<p>Unhappy? <%= button_to "Cancel my account", registration_path(resource_name), :data => { :confirm => "Are you sure?" }, :method => :delete %></p>
+<p><%= button_to "Delete account", registration_path(resource_name), :data => { :confirm => "Are you sure about that?" }, :method => :delete, :class => "btn" %></p>
 
 <%= link_to "Back", :back %>
+
+<script type="text/javascript">
+  var editor = CodeMirror.fromTextArea(document.getElementById("code-preview"), {
+    lineNumbers: true,
+  });
+
+  editor.setSize(null, 125);
+
+  var input = document.getElementById("user_editor_theme");
+  function selectTheme() {
+    console.log("hi");
+    var theme = input.options[input.selectedIndex].innerHTML;
+    editor.setOption("theme", theme);
+  }
+
+  selectTheme();
+</script>

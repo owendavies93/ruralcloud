@@ -10,8 +10,7 @@ Ruralcloud::Application.routes.draw do
              :path => "",
              :path_names => { :sign_up  => "register",
                               :sign_in  => "login",
-                              :sign_out => "logout",
-                              :edit     => "preferences"
+                              :sign_out => "logout"
                             }
 
   get "home/index"

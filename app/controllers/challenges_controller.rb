@@ -92,12 +92,16 @@ class ChallengesController < ApplicationController
 
   private
   def is_entered challenge
-    challenge.users.each { |u|
-      if u.email == current_user.email
-        return true
-      end
-    }
-    return false
+    if user_signed_in?
+      challenge.users.each { |u|
+        if u.email == current_user.email
+          return true
+        end
+      }
+      return false
+    else
+      return false
+    end
   end
   helper_method :is_entered
 

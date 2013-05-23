@@ -10,6 +10,7 @@
  *
  *= require_self
  *= require_tree .
+ *= require codemirror
  */
 
 @import 'bootstrap';
@@ -52,6 +53,10 @@ html, body {
     font-family: inherit;
 }
 
+.avatar {
+    margin-top: 6px;
+}
+
 .notice {
     text-align: center;
 }
@@ -64,6 +69,11 @@ html, body {
 
 #start-countdown {
     padding: 2px 0;
+}
+
+.log {
+    height: 400px;
+    overflow: auto;
 }
 
 @import 'bootstrap-responsive';
