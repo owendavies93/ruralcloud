@@ -15,7 +15,7 @@
     <%= f.text_area :description, :placeholder => "Description", :style => "width:300px;", :rows => "1" %>
   </div>
   <div class="field">
-    <%= f.number_field :difficulty, :placeholder => "Difficulty (0-?)" %>
+    <%= f.number_field :difficulty, :placeholder => "Difficulty (0-10)" %>
   </div>
   <div class="row">
     <div class="span6">
@@ -30,13 +30,25 @@
     </div>
   </div>
   <br/>
-  <div class="field" style="clear:both">
-    <%= f.label :starttime %>
-    <%= f.datetime_select :starttime %>
+  <div class="field">
+    <div id="start_date_creator" class="control-group">
+      <p class="creator">
+        <%= f.label :starttime %>
+        <input class="input" placeholder='tomorrow at 1pm' type="text" size="30">
+        <%= f.hidden_field :starttime, :class =>"date_output" %>
+        <span class="output"></span>
+      </p>
+    </div>
   </div>
   <div class="field">
-    <%= f.label :endtime %>
-    <%= f.datetime_select :endtime %>
+    <div id="end_date_creator" class="control-group">
+      <p class="creator">
+        <%= f.label :endtime %>
+        <input class="input" placeholder='tomorrow at 1pm' type="text" size="30">
+        <%= f.hidden_field :endtime, :class =>"date_output" %>
+        <span class="output"></span>
+      </p>
+    </div>
   </div>
   <div class="field">
     <%= f.hidden_field :owner, :value => sanitize(current_user.email) %>
@@ -56,4 +68,44 @@ $(document).ready(function() {
     $preview.html(convert($spec.val()));
   });
 });
+
+$(document).ready(function() {
+  setDateBox('#start_date_creator');
+  setDateBox('#end_date_creator');
+});
+
+function setDateBox(id) {
+  var el = $(id);
+  var input = $('input', el);
+  var output = $('.output', el);
+  var date_output = $('.date_output', el);
+  input.keyup(function() {
+    var val = input.val().trim();
+    if(/^\d+$/.test(val)) {
+      val = val.toNumber();
+    }
+    var text, date = Date.create(String(val));
+    if(input.val() == '') {
+      date = Date.create("tomorrow at 1pm");
+    }
+    if(!date.isValid()) {
+      text = 'Invalid date.'
+      el.addClass("error");
+    } else {
+      text = date.format('{Weekday} {Month} {ord}, {year} {HH}:{mm}:{ss}');
+      el.removeClass("error");
+    }
+    output.text(text);
+    date_output.val(text);
+  });
+  $('.clickable').click(function() {
+    input.val($(this).html());
+    input.keyup();
+  });
+  input.keyup();
+  input.click(function() {
+    input.select();
+  });
+}
+
 </script>
