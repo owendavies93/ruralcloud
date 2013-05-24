@@ -15,7 +15,7 @@
   <div class="row-fluid">
     <div class="span6">
       <textarea rows="30" id="editor" placeholder=""></textarea>
-    <a id="compile-button" class="btn btn-primary" <% started && !ended ? "" : "disabled" %>>Compile</a>
+    <a id="compile-button" class="btn btn-primary pull-right" <% started && !ended ? "" : "disabled" %>>Compile</a>
     </div>
     <div class="span6">
       <div class="row-fluid codewrapper">
@@ -87,7 +87,7 @@
   $("#compile-button").click(function(){
     // This just sets the last line of the console
     co.setLine(co.lineCount()-1, "Compiled");
-    co.replaceSelection("\n" + prompt, "end", "+input");
+    co.replaceSelection("\n" + "$> ", "end", "+input");
   });
 
 </script>

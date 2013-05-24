@@ -44,7 +44,7 @@
     <div id="end_date_creator" class="control-group">
       <p class="creator">
         <%= f.label :endtime %>
-        <input class="input" placeholder='tomorrow at 1pm' type="text" size="30">
+        <input class="input" placeholder='tomorrow at 2pm' type="text" size="30">
         <%= f.hidden_field :endtime, :class =>"date_output" %>
         <span class="output"></span>
       </p>
@@ -70,15 +70,16 @@ $(document).ready(function() {
 });
 
 $(document).ready(function() {
-  setDateBox('#start_date_creator');
-  setDateBox('#end_date_creator');
+  setDateBox('#start_date_creator', "tomorrow at 1pm");
+  setDateBox('#end_date_creator', "tomorrow at 2pm");
 });
 
-function setDateBox(id) {
+function setDateBox(id, default_time) {
   var el = $(id);
   var input = $('input', el);
   var output = $('.output', el);
   var date_output = $('.date_output', el);
+  var date_format = '{Weekday} {Month} {ord}, {year} {HH}:{mm}:{ss}';
   input.keyup(function() {
     var val = input.val().trim();
     if(/^\d+$/.test(val)) {
@@ -86,17 +87,17 @@ function setDateBox(id) {
     }
     var text, date = Date.create(String(val));
     if(input.val() == '') {
-      date = Date.create("tomorrow at 1pm");
+      date = Date.create(default_time);
     }
     if(!date.isValid()) {
       text = 'Invalid date.'
       el.addClass("error");
     } else {
-      text = date.format('{Weekday} {Month} {ord}, {year} {HH}:{mm}:{ss}');
+      text = date.format(date_format);
       el.removeClass("error");
     }
     output.text(text);
-    date_output.val(text);
+    date_output.val(date.utc(true).format(date_format));
   });
   $('.clickable').click(function() {
     input.val($(this).html());
