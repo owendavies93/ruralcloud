@@ -4,34 +4,31 @@ module Rabbitq
   class Client
     attr_accessor :thread
 
-    def self.publish message
-      new.publish message
+    def self.publish message, block
+      new.publish message, block
     end
 
-    def publish message
+    def publish(message, block)
       begin
-        if EventMachine.reactor_running?
-          start_em {
-            channel = AMQP::Channel.new($connection)
-            corr_id = rand(10_000_000).to_s
-            requests[corr_id] = nil
-
-            callback_queue.append_callback(:declare) do
-              channel.default_exchange.publish(message, :routing_key => "rural_jobs", :reply_to => callback_queue.name, :correlation_id => corr_id, :persistent => true)
-
-              EventMachine.add_periodic_timer(0.1) do
-                if result = AMQP.requests[corr_id]
-                  puts result
-                  break
-                end
-              end
-
+        corr_id = rand(10_000_000).to_s
+        AdmitEventMachine::requests_list[corr_id] = nil
+        if EM.reactor_running?
+          EM.next_tick() {
+            AdmitEventMachine::open_channel.default_exchange.publish(
+              message, 
+              :routing_key => "rural_jobs",
+              :reply_to => AdmitEventMachine::queue.name,
+              :correlation_id => corr_id
+              )
+            timer = EventMachine::PeriodicTimer.new(0.1) do
+            if result = AdmitEventMachine::requests_list[corr_id]
+              block.call(result)
+              timer.cancel
             end
+          end
           }
-          return true
         else
-         # Event Machine is not running!
-         # requeue?
+         puts "Ohno"
          return false
         end
       rescue Exception => exc
