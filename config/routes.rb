@@ -18,4 +18,7 @@ Ruralcloud::Application.routes.draw do
 
   post "home/index"
   root :to => 'home#index'
+
+  post "home/send_message"
+  root :to => 'home#index'
 end

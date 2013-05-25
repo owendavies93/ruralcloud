@@ -12,20 +12,22 @@ module Rabbitq
       begin
         corr_id = rand(10_000_000).to_s
         AdmitEventMachine::requests_list[corr_id] = nil
+
         if EM.reactor_running?
           EM.next_tick() {
             AdmitEventMachine::open_channel.default_exchange.publish(
-              message, 
+              message,
               :routing_key => "rural_jobs",
               :reply_to => AdmitEventMachine::queue.name,
               :correlation_id => corr_id
               )
-            timer = EventMachine::PeriodicTimer.new(0.1) do
-            if result = AdmitEventMachine::requests_list[corr_id]
-              block.call(result)
-              timer.cancel
+
+              timer = EventMachine::PeriodicTimer.new(0.1) do
+              if result = AdmitEventMachine::requests_list[corr_id]
+                block.call(result)
+                timer.cancel
+              end
             end
-          end
           }
         else
          puts "Ohno"

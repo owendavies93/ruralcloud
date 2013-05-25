@@ -4,8 +4,9 @@ class HomeController < ApplicationController
   def index
   end
 
-  def send_message(n)
-    Rabbitq::Client::publish("4+3", self)
+  def send_message
+    Rabbitq::Client::publish(params[:input], self)
+    render :partial => 'message', :content_type => 'text/html'
   end
   helper_method :send_message
 
