@@ -121,4 +121,14 @@ class ChallengesController < ApplicationController
   end
   helper_method :has_ended
 
+  def send_compile
+    puts params
+    Rabbitq::Client::publish(params[:editor], self)
+    throw :async
+  end
+  helper_method :send_compile
+
+  def call(result)
+    request.env['async.callback'].call [200, {'Content-Type' => 'text/plain'}, result]
+  end
 end

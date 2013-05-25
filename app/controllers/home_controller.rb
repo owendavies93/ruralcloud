@@ -11,6 +11,6 @@ class HomeController < ApplicationController
   helper_method :send_message
 
   def call(result)
-    request.env['async.callback'].call [200, {'Content-Type' => 'text/plain'}, result]
+    request.env['async.callback'].call [200, {'Content-Type' => 'text/html'}, result]
   end
 end

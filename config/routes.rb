@@ -21,4 +21,7 @@ Ruralcloud::Application.routes.draw do
 
   post "home/send_message"
   root :to => 'home#index'
+
+  post "challenges/send_compile"
+  root :to => "challenges#send_compile"
 end

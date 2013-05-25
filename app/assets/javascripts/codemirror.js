@@ -3405,6 +3405,12 @@ window.CodeMirror = (function() {
         var cmd = co.getLine(co.lineCount() - 2).substring(3);
         // Send cmd to server, get back result
 
+        // var posting = $.post("challanges/terminal", cmd);
+
+        // posting.done(function(data) {
+        //   $("#result").empty().append(data);
+        // })
+
         co.setLine(co.lineCount() - 1, "You typed " + cmd);
         co.replaceSelection("\n" + prompt, "end", "+input");
         // 'Mark' lines as uneditable

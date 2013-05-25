@@ -14,8 +14,10 @@
 <div class="container-fluid">
   <div class="row-fluid">
     <div class="span6">
-      <textarea rows="30" id="editor" placeholder=""></textarea>
-    <a id="compile-button" class="btn btn-primary pull-right" <% started && !ended ? "" : "disabled" %>>Compile</a>
+      <%= form_tag({:action => 'send_compile'}, :remote => true, :'data-update-target' => 'result') do %>
+        <textarea rows="30" id="editor" placeholder=""></textarea>
+        <%= submit_tag 'Compile', :disable_with => 'Wait...', :class => "btn btn-primary pull-right" %>
+      <% end %>
     </div>
     <div class="span6">
       <div class="row-fluid codewrapper">
@@ -49,6 +51,8 @@
         </blockquote>
       </div>
     </div>
+
+    <div id="result"></div>
   </div>
 </div>
 

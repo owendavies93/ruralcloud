@@ -26,6 +26,14 @@ $(function() {
      */
     $('form[data-update-target]').on('ajax:success', function(evt, data) {
         var target = $(this).data('update-target');
-        $('#' + target).html(data);
+
+        var result = $.parseJSON(data);
+        $('#' + target).html(result.responseString);
+
+        if (result.status != 0) {
+            $('#' + target).css("color", "red");
+        } else {
+            $('#' + target).css("color", "green");
+        }
     });
 });
