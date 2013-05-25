@@ -6,11 +6,11 @@ class HomeController < ApplicationController
 
   def send_message
     Rabbitq::Client::publish(params[:input], self)
-    render :partial => 'message', :content_type => 'text/html'
+    throw :async
   end
   helper_method :send_message
 
   def call(result)
-    puts result
+    request.env['async.callback'].call [200, {'Content-Type' => 'text/plain'}, result]
   end
 end
