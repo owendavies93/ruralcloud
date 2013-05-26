@@ -1,3 +1,5 @@
+require 'rabbitq/client'
+
 class ChallengesController < ApplicationController
   # GET /challenges
   # GET /challenges.json
@@ -90,11 +92,9 @@ class ChallengesController < ApplicationController
   end
 
   def send_compile
-    puts params
     Rabbitq::Client::publish(params[:input], self)
     throw :async
   end
-  helper_method :send_compile
 
   def call(result)
     request.env['async.callback'].call [200, {'Content-Type' => 'text/plain'}, result]
