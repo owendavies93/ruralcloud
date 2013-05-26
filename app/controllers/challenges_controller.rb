@@ -122,7 +122,7 @@ class ChallengesController < ApplicationController
 
   def send_compile
     puts params
-    Rabbitq::Client::publish(params[:editor], self)
+    Rabbitq::Client::publish(params[:input], self)
     throw :async
   end
   helper_method :send_compile
