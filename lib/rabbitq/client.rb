@@ -13,8 +13,6 @@ module Rabbitq
         corr_id = rand(10_000_000).to_s
         AdmitEventMachine::requests_list[corr_id] = nil
 
-        puts "sending " + message + " with correlation_id = " + corr_id;
-
         if EM.reactor_running?
           EM.next_tick() {
             AdmitEventMachine::open_channel.default_exchange.publish(
@@ -26,7 +24,6 @@ module Rabbitq
 
               timer = EventMachine::PeriodicTimer.new(0.1) do
               if result = AdmitEventMachine::requests_list[corr_id]
-                puts "picked " + result + " with correlation_id = " + corr_id;
                 block.call(result)
                 timer.cancel
               end
