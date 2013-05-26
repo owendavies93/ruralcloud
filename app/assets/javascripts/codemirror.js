@@ -3412,8 +3412,6 @@ window.CodeMirror = (function() {
             //   0 means success
             //   anything else means Haskell error
 
-            // I'm getting 256 as the status code for server attack and Haskell error - Owen
-
             co.setLine(co.lineCount() - 1, data.responseString);
             co.replaceSelection("\n" + prompt, "end", "+input");
             // 'Mark' lines as uneditable
