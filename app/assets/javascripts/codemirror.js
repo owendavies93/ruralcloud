@@ -3400,7 +3400,6 @@ window.CodeMirror = (function() {
     keyMap.conmap = {
       Enter: function(co) {
         if ($.inArray(co.getCursor().line, used) == -1) {
-          console.log("allowed");
           co.setCursor({line: co.getCursor().line});
           co.replaceSelection("\n", "end", "+input");
 
@@ -3425,8 +3424,6 @@ window.CodeMirror = (function() {
             history.push(cmd);
             currentline++;
           }, "json");
-        } else {
-          console.log("not allowed");
         }
       },
 
