@@ -3411,16 +3411,23 @@ window.CodeMirror = (function() {
         //   $("#result").empty().append(data);
         // })
 
-        co.setLine(co.lineCount() - 1, "You typed " + cmd);
-        co.replaceSelection("\n" + prompt, "end", "+input");
-        // 'Mark' lines as uneditable
-        used.push(co.lineCount() - 2);
-        used.push(co.lineCount() - 3);
+        $.post("/home/send_message", {input: cmd}, function(data) {
+          // data.status:
+          //   -1 means server attack
+          //   0 means success
+          //   anything else means Haskell error
 
-        // Add cod to history
-        history.push(cmd);
-        currentline++;
-        console.log(history);
+          co.setLine(co.lineCount() - 1, data.responseString);
+          co.replaceSelection("\n" + prompt, "end", "+input");
+          // 'Mark' lines as uneditable
+          used.push(co.lineCount() - 2);
+          used.push(co.lineCount() - 3);
+
+          // Add cod to history
+          history.push(cmd);
+          currentline++;
+          console.log(history);
+        }, "json");
       },
 
       // Intercept backspace and delete to stop old command deletion
