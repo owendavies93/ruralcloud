@@ -89,37 +89,6 @@ class ChallengesController < ApplicationController
     redirect_to :back, :notice => "You have entered this challenge!"
   end
 
-  private
-  def is_entered challenge
-    if user_signed_in?
-      challenge.users.each { |u|
-        if u.email == current_user.email
-          return true
-        end
-      }
-      return false
-    else
-      return false
-    end
-  end
-  helper_method :is_entered
-
-  private
-  def has_started challenge
-    now = Time.new
-
-    return challenge.starttime < now.inspect
-  end
-  helper_method :has_started
-
-  private
-  def has_ended challenge
-    now = Time.new
-
-    return challenge.endtime < now.inspect
-  end
-  helper_method :has_ended
-
   def send_compile
     puts params
     Rabbitq::Client::publish(params[:input], self)
@@ -130,4 +99,33 @@ class ChallengesController < ApplicationController
   def call(result)
     request.env['async.callback'].call [200, {'Content-Type' => 'text/plain'}, result]
   end
+
+  private
+    def is_entered challenge
+      if user_signed_in?
+        challenge.users.each { |u|
+          if u.email == current_user.email
+            return true
+          end
+        }
+        return false
+      else
+        return false
+      end
+    end
+    helper_method :is_entered
+
+    def has_started challenge
+      now = Time.new
+
+      return challenge.starttime < now.inspect
+    end
+    helper_method :has_started
+
+    def has_ended challenge
+      now = Time.new
+
+      return challenge.endtime < now.inspect
+    end
+    helper_method :has_ended
 end

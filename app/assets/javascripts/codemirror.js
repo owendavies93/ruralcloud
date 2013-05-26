@@ -3406,7 +3406,7 @@ window.CodeMirror = (function() {
           var cmd = co.getLine(co.lineCount() - 2).substring(3);
           // Send cmd to server, get back result
 
-          $.post("/home/send_message", {input: cmd}, function(data) {
+          $.post("/challenges/send_compile", {input: cmd}, function(data) {
             // data.status:
             //   -1 means server attack
             //   0 means success
