@@ -83,7 +83,8 @@
       mode: "shell",
       readOnly: "<%= started && !ended ? "" : "nocursor" %>",
       dragDrop: false,
-      keyMap: "conmap"
+      keyMap: "conmap",
+      lineWrapping: true
     });
 
   co.setSize(null, 300);
