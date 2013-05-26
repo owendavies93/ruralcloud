@@ -85,7 +85,6 @@ class ChallengesController < ApplicationController
   def enter
     @challenge = Challenge.find(params[:id])
 
-    current_user.update_attribute(:challenge_id, @challenge.id)
     @challenge.users << current_user
     redirect_to :back, :notice => "You have entered this challenge!"
   end
