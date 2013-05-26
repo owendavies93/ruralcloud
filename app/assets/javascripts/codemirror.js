@@ -3399,35 +3399,35 @@ window.CodeMirror = (function() {
 
     keyMap.conmap = {
       Enter: function(co) {
-        co.setCursor({line: co.getCursor().line});
-        co.replaceSelection("\n", "end", "+input");
+        if ($.inArray(co.getCursor().line, used) == -1) {
+          console.log("allowed");
+          co.setCursor({line: co.getCursor().line});
+          co.replaceSelection("\n", "end", "+input");
 
-        var cmd = co.getLine(co.lineCount() - 2).substring(3);
-        // Send cmd to server, get back result
+          var cmd = co.getLine(co.lineCount() - 2).substring(3);
+          // Send cmd to server, get back result
 
-        // var posting = $.post("challanges/terminal", cmd);
+          $.post("/home/send_message", {input: cmd}, function(data) {
+            // data.status:
+            //   -1 means server attack
+            //   0 means success
+            //   anything else means Haskell error
 
-        // posting.done(function(data) {
-        //   $("#result").empty().append(data);
-        // })
+            // I'm getting 256 as the status code for server attack and Haskell error - Owen
 
-        $.post("/home/send_message", {input: cmd}, function(data) {
-          // data.status:
-          //   -1 means server attack
-          //   0 means success
-          //   anything else means Haskell error
+            co.setLine(co.lineCount() - 1, data.responseString);
+            co.replaceSelection("\n" + prompt, "end", "+input");
+            // 'Mark' lines as uneditable
+            used.push(co.lineCount() - 2);
+            used.push(co.lineCount() - 3);
 
-          co.setLine(co.lineCount() - 1, data.responseString);
-          co.replaceSelection("\n" + prompt, "end", "+input");
-          // 'Mark' lines as uneditable
-          used.push(co.lineCount() - 2);
-          used.push(co.lineCount() - 3);
-
-          // Add cod to history
-          history.push(cmd);
-          currentline++;
-          console.log(history);
-        }, "json");
+            // Add cod to history
+            history.push(cmd);
+            currentline++;
+          }, "json");
+        } else {
+          console.log("not allowed");
+        }
       },
 
       // Intercept backspace and delete to stop old command deletion
