@@ -1,22 +1,37 @@
 require 'amqp'
+require 'beefcake'
 
 module Rabbitq
+  class RuralMessage
+    include Beefcake::Message
+    required :code, :string, 1
+
+    required :filename, :string, 2
+  end
+
   class Client
     attr_accessor :thread
 
-    def self.publish message, block
-      new.publish message, block
+    def self.publish(message, block, file="")
+      new.publish message, block, file
     end
 
-    def publish(message, block)
+    def publish(message, block, file="")
       begin
+        serialisedMessage = RuralMessage.new
+        serialisedMessage.code = message
+        serialisedMessage.filename = file
+
+        m = ""
+        serialisedMessage.encode(m)
+
         corr_id = rand(10_000_000).to_s
         AdmitEventMachine::requests_list[corr_id] = nil
 
         if EM.reactor_running?
           EM.next_tick() {
             AdmitEventMachine::open_channel.default_exchange.publish(
-              message,
+              m,
               :routing_key => "rural_jobs",
               :reply_to => AdmitEventMachine::queue.name,
               :correlation_id => corr_id

@@ -30,6 +30,7 @@ gem 'redcarpet'
 
 gem 'eventmachine'
 gem 'amqp'
+gem 'beefcake'
 
 gem 'thin'
 
