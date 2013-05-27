@@ -92,19 +92,16 @@ class ChallengesController < ApplicationController
   end
 
   def send_compile
-    puts "compile"
-    puts params
-    @entry = Entry.find(:first, :conditions => {:user_id => current_user.id, :challenge_id => params[:challenge]})
-    new_compilations = @entry.compilations + 1
-    @entry.update_attributes(:compilations => new_compilations, :length => params[:length], :lines => params[:lines])
+    @entry = get_entry(params[:challenge])
+    @entry.update_attributes(:compilations =>  @entry.compilations + 1, :length => params[:length], :lines => params[:lines])
     filename = "M" + params[:challenge] + "_" + current_user.id.to_s
     Rabbitq::Client::publish(params[:input], self, 1, filename)
     throw :async
   end
 
   def send_eval
-    puts "eval"
-    puts params
+    @entry = get_entry(params[:challenge])
+    @entry.update_attributes(:evaluations => @entry.evaluations + 1)
     filename = "M" + params[:challenge] + "_" + current_user.id.to_s
     Rabbitq::Client::publish(params[:input], self, 0, filename)
     throw :async
@@ -112,6 +109,10 @@ class ChallengesController < ApplicationController
 
   def call(result)
     request.env['async.callback'].call [200, {'Content-Type' => 'text/plain'}, result]
+  end
+
+  def get_entry challenge_id
+    return Entry.find(:first, :conditions => {:user_id => current_user.id, :challenge_id => challenge_id})
   end
 
   private
@@ -142,4 +143,16 @@ class ChallengesController < ApplicationController
       return challenge.endtime < now.inspect
     end
     helper_method :has_ended
+
+    def failed_eval challenge_id
+      @entry = get_entry(challenge_id)
+      @entry.update_attributes(:failed_evaluations => @entry.failed_evaluations + 1)
+    end
+    helper_method :failed_eval
+
+    def failed_compilation challenge_id
+      @entry = get_entry(challenge_id)
+      @entry.update_attributes(:failed_compilations => @entry.failed_compilations + 1)
+    end
+    helper_method :failed_compilation
 end

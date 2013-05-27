@@ -1,7 +1,6 @@
 <% started = has_started(@challenge)
    ended = has_ended(@challenge) %>
 
-<h2>Challenge #<%= @challenge.id %></h2>
 <% if started %>
   <p>Administration Panel</p>
 <% end %>
@@ -45,15 +44,29 @@
     <h4>Entrants:</h4>
     <% if not @challenge.users.blank? %>
       <% for user in @challenge.users %>
-        <p>
+        <div class="well well-small" style="width: 90%">
           <%= image_tag gravatar(user) %><br/>
           <b><%= sanitize user.email %></b><br/>
           <% entry = Entry.find(:first, :conditions => {user_id: user.id, challenge_id: @challenge.id}) %>
           <b>Compilations: </b><%= entry.compilations %><br/>
+          <b>Evaluations: </b><%= entry.evaluations %><br/>
           <b>Code length: </b><%= entry.length %><br/>
           <b>Lines: </b><%= entry.lines %><br/>
-          <b>Realtime test score: </b>TODO
-        </p>
+          <b>Realtime test score: </b>TODO<br/>
+          <b>Failed Compilation %: </b>
+          <% if entry.compilations > 0 %>
+            <%= entry.failed_compilations / entry.compilations / 1 * 100 %>
+          <% else %>
+            0
+          <% end %>
+          <br/>
+          <b>Failed Evaluation %: </b>
+          <% if entry.evaluations > 0 %>
+            <%= entry.failed_evaluations / entry.evaluations / 1 * 100%>
+          <% else %>
+            0
+          <% end %>
+        </div>
       <% end %>
     <% else %>
       There are no entrants. Sorry!
