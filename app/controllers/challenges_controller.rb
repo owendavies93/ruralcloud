@@ -94,14 +94,19 @@ class ChallengesController < ApplicationController
   def send_compile
     puts "compile"
     puts params
-    Rabbitq::Client::publish(params[:input], self, 1, "M" + params[:challenge] + "_" + current_user.id.to_s)
+    @entry = Entry.find(:first, :conditions => {:user_id => current_user.id, :challenge_id => params[:challenge]})
+    new_compilations = @entry.compilations + 1
+    @entry.update_attributes(:compilations => new_compilations, :length => params[:length], :lines => params[:lines])
+    filename = "M" + params[:challenge] + "_" + current_user.id.to_s
+    Rabbitq::Client::publish(params[:input], self, 1, filename)
     throw :async
   end
 
   def send_eval
     puts "eval"
     puts params
-    Rabbitq::Client::publish(params[:input], self, 0, "M" + params[:challenge] + "_" + current_user.id.to_s)
+    filename = "M" + params[:challenge] + "_" + current_user.id.to_s
+    Rabbitq::Client::publish(params[:input], self, 0, filename)
     throw :async
   end
 
@@ -112,8 +117,8 @@ class ChallengesController < ApplicationController
   private
     def is_entered challenge
       if user_signed_in?
-        challenge.users.each { |u|
-          if u.email == current_user.email
+        challenge.entries.each { |e|
+          if e.user_id == current_user.id
             return true
           end
         }

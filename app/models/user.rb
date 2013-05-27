@@ -10,5 +10,6 @@ class User < ActiveRecord::Base
                   :editor_theme, :mapping_preference
   # attr_accessible :title, :body
 
-  has_and_belongs_to_many :challenges
+  has_many :entries
+  has_many :challenges, :through => :entries
 end

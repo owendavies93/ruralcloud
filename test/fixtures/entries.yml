@@ -1,0 +1,15 @@
+# Read about fixtures at http://api.rubyonrails.org/classes/ActiveRecord/Fixtures.html
+
+one:
+  challenge_id: 1
+  user_id: 1
+  compilations: 1
+  length: 1
+  lines: 1
+
+two:
+  challenge_id: 1
+  user_id: 1
+  compilations: 1
+  length: 1
+  lines: 1

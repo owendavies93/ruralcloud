@@ -4,7 +4,8 @@ class Challenge < ActiveRecord::Base
   validate :not_in_past, :later_than_start, :not_invalid
   attr_accessible :description, :difficulty, :endtime, :owner, :spec, :starttime
 
-  has_and_belongs_to_many :users
+  has_many :entries
+  has_many :users, :through => :entries
 
   def not_in_past
     if !starttime.blank? and starttime < DateTime.now

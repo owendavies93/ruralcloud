@@ -38,17 +38,23 @@
 </div>
 
 <% if started %>
-  <div class="span4 well well-small log">
+  <div class="span4 well well-small log" style="font-family: 'Inconsolata', monospace">
     Log - TODO
   </div>
   <div class="span4 log">
     <h4>Entrants:</h4>
     <% if not @challenge.users.blank? %>
-      <ul>
       <% for user in @challenge.users %>
-        <li><%= sanitize user.email %></li>
+        <p>
+          <%= image_tag gravatar(user) %><br/>
+          <b><%= sanitize user.email %></b><br/>
+          <% entry = Entry.find(:first, :conditions => {user_id: user.id, challenge_id: @challenge.id}) %>
+          <b>Compilations: </b><%= entry.compilations %><br/>
+          <b>Code length: </b><%= entry.length %><br/>
+          <b>Lines: </b><%= entry.lines %><br/>
+          <b>Realtime test score: </b>TODO
+        </p>
       <% end %>
-      </ul>
     <% else %>
       There are no entrants. Sorry!
     <% end %>
