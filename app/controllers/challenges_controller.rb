@@ -95,7 +95,7 @@ class ChallengesController < ApplicationController
     @entry = get_entry(params[:challenge])
     @entry.update_attributes(:compilations =>  @entry.compilations + 1, :length => params[:length], :lines => params[:lines])
     filename = "M" + params[:challenge] + "_" + current_user.id.to_s
-    Rabbitq::Client::publish(params[:input], self, 1, filename)
+    Rabbitq::Client::publish(params[:input], self, 1, filename, params[:challenge])
     throw :async
   end
 
@@ -103,12 +103,40 @@ class ChallengesController < ApplicationController
     @entry = get_entry(params[:challenge])
     @entry.update_attributes(:evaluations => @entry.evaluations + 1)
     filename = "M" + params[:challenge] + "_" + current_user.id.to_s
-    Rabbitq::Client::publish(params[:input], self, 0, filename)
+    Rabbitq::Client::publish(params[:input], self, 0, filename, params[:challenge])
     throw :async
   end
 
-  def call(result)
+  def call(result, challenge)
+    cur_challenge = Challenge.find(challenge)
     request.env['async.callback'].call [200, {'Content-Type' => 'text/plain'}, result]
+    res = JSON.parse(result)
+
+    if res["status"].to_i == -1
+      log("POTENTIAL SERVER ATTACK", challenge)
+    end
+
+    if res["isCompileJob"]
+      if res["status"].to_i > 0
+        failed_compilation(cur_challenge.id)
+        log("Failed compilation", challenge)
+      else
+        log("Successful compilation", challenge)
+      end
+    else
+      if res["status"].to_i > 0
+        failed_eval(cur_challenge.id)
+        log("Failed evaluation", challenge)
+      else
+        log("Successful evaluation", challenge)
+      end
+    end
+  end
+
+  def log message, challenge
+    cur_challenge = Challenge.find(challenge)
+    now = Time.new
+    cur_challenge.update_attribute("log", now.inspect + ": " + message + " - " + current_user.email + "\n" + cur_challenge.log )
   end
 
   def get_entry challenge_id
@@ -118,7 +146,7 @@ class ChallengesController < ApplicationController
   private
     def is_entered challenge
       if user_signed_in?
-        challenge.entries.each { |e|
+        @challenge.entries.each { |e|
           if e.user_id == current_user.id
             return true
           end
@@ -132,14 +160,12 @@ class ChallengesController < ApplicationController
 
     def has_started challenge
       now = Time.new
-
       return challenge.starttime < now.inspect
     end
     helper_method :has_started
 
     def has_ended challenge
       now = Time.new
-
       return challenge.endtime < now.inspect
     end
     helper_method :has_ended

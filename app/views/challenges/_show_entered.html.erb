@@ -109,12 +109,6 @@
               //   0 means success
               //   anything else means Haskell error
 
-              if (data.status == -1) {
-                // report server attack somehow
-              } else if (data.status > 0) {
-                <% failed_eval(@challenge.id) %>
-              }
-
               co.setLine(co.lineCount() - 1, data.responseString);
               co.replaceSelection("\n" + prompt, "end", "+input");
               // 'Mark' lines as uneditable
@@ -182,11 +176,6 @@
       co.setOption("readOnly", true);
       $.post("/challenges/send_compile", {input: editor.getValue(), challenge: <%= @challenge.id %>, lines: editor.lineCount(), length: editor.getValue().length},
         function(data) {
-
-          if (data.status > 0) {
-            <% failed_compilation(@challenge.id) %>
-          }
-
           co.replaceSelection("\n" + data.responseString, "end", "+input");
           co.replaceSelection("\n" + prompt, "end", "+input");
           $("#compile-button").removeAttr("disabled");
