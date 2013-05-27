@@ -92,7 +92,16 @@ class ChallengesController < ApplicationController
   end
 
   def send_compile
-    Rabbitq::Client::publish(params[:input], self)
+    puts "compile"
+    puts params
+    Rabbitq::Client::publish(params[:input], self, 1, params[:challenge] + "_" + current_user.id.to_s + ".hs")
+    throw :async
+  end
+
+  def send_eval
+    puts "eval"
+    puts params
+    Rabbitq::Client::publish(params[:input], self, 0, params[:challenge] + "_" + current_user.id.to_s + ".hs")
     throw :async
   end
 

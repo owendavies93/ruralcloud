@@ -14,10 +14,8 @@
 <div class="container-fluid">
   <div class="row-fluid">
     <div class="span6">
-      <%= form_tag({:action => 'send_compile'}, :remote => true, :'data-update-target' => 'result') do %>
         <textarea rows="30" id="editor" placeholder=""></textarea>
-        <%= submit_tag 'Compile', :disable_with => 'Wait...', :class => "btn btn-primary pull-right" %>
-      <% end %>
+        <a id="compile-button" class="btn btn-primary pull-right">Compile</a>
     </div>
     <div class="span6">
       <div class="row-fluid codewrapper">
@@ -79,20 +77,102 @@
       theme: "<%= current_user.editor_theme %>"
     });
 
+
+  var used = new Array();
+  var history = new Array();
+  var currentline = 0;
+  var prompt = "$> "
+
+  function getCurLineLen(co) {
+    return co.getLine(co.getCursor().line).length
+  };
+
   var co = CodeMirror.fromTextArea(document.getElementById('console'), {
       mode: "shell",
       readOnly: "<%= started && !ended ? "" : "nocursor" %>",
       dragDrop: false,
       keyMap: "conmap",
-      lineWrapping: true
+      lineWrapping: true,
+      extraKeys: {
+        Enter: function(co) {
+          if ($.inArray(co.getCursor().line, used) == -1) {
+            co.setCursor({line: co.getCursor().line});
+            co.replaceSelection("\n", "end", "+input");
+
+            var cmd = co.getLine(co.lineCount() - 2).substring(3);
+            // Send cmd to server, get back result
+
+            $.post("/challenges/send_eval", {input: cmd, challenge:<%= @challenge.id %>}, function(data) {
+              // data.status:
+              //   -1 means server attack
+              //   0 means success
+              //   anything else means Haskell error
+
+              co.setLine(co.lineCount() - 1, data.responseString);
+              co.replaceSelection("\n" + prompt, "end", "+input");
+              // 'Mark' lines as uneditable
+              used.push(co.lineCount() - 2);
+              used.push(co.lineCount() - 3);
+
+              // Add cod to history
+              history.push(cmd);
+              currentline++;
+            }, "json");
+          }
+        },
+
+        // Intercept backspace and delete to stop old command deletion
+        Backspace: function(co) {
+          var cur = co.getCursor().line;
+          if ($.inArray(cur, used) == -1 && getCurLineLen(co) > 3) {
+            co.deleteH(-1, "char");
+          }
+        },
+
+        Delete: function(co) {
+          var cur = co.getCursor().line;
+          if ($.inArray(cur, used) == -1 && getCurLineLen(co) > 3) {
+            co.deleteH(1, "char");
+          }
+        },
+
+        Left: function(co) {
+          if (co.getCursor().ch > 3) {
+            co.moveH(-1, "column");
+          }
+        },
+
+        Right: "goCharRight",
+
+        // Use up and down for command history
+        Up: function(co) {
+          var cur = co.getCursor().line;
+          if (currentline > 0) {
+            co.setLine(cur, prompt + history[--currentline]);
+          }
+        },
+
+        Down: function(co) {
+          var cur = co.getCursor().line;
+          if (currentline < history.length - 1) {
+            co.setLine(cur, prompt + history[++currentline]);
+          } else if (currentline == history.length - 1) {
+            co.setLine(cur, prompt);
+            currentline++;
+          }
+        }
+      }
     });
 
   co.setSize(null, 300);
 
   $("#compile-button").click(function(){
-    // This just sets the last line of the console
-    co.setLine(co.lineCount()-1, "Compiled");
-    co.replaceSelection("\n" + "$> ", "end", "+input");
+    co.setLine(co.lineCount()-1, "Compiling...");
+    $.post("/challenges/send_compile", {input: editor.getValue(), challenge: <%= @challenge.id %>},
+      function(data) {
+        co.replaceSelection("\n" + data.responseString, "end", "+input");
+        co.replaceSelection("\n" + prompt, "end", "+input");
+      }, "json");
   });
 
 </script>

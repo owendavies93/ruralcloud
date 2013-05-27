@@ -4,29 +4,36 @@ require 'beefcake'
 module Rabbitq
   class RuralMessage
     include Beefcake::Message
-    required :code, :string, 1
-
-    required :filename, :string, 2
+    required :compile, :int32, 1
+    required :code, :string, 2
+    required :filename, :string, 3
   end
 
   class Client
     attr_accessor :thread
 
-    def self.publish(message, block, file="")
-      new.publish message, block, file
+    def self.publish(message, block, compile, file)
+      new.publish(message, block, compile, file)
     end
 
-    def publish(message, block, file="")
+    def publish(message, block, compile, file)
       begin
+        puts message
+
         serialisedMessage = RuralMessage.new
+        serialisedMessage.compile = compile
         serialisedMessage.code = message
         serialisedMessage.filename = file
 
         m = ""
         serialisedMessage.encode(m)
 
+        puts m
+
         corr_id = rand(10_000_000).to_s
         AdmitEventMachine::requests_list[corr_id] = nil
+
+        puts "sending " + corr_id
 
         if EM.reactor_running?
           EM.next_tick() {
@@ -39,6 +46,7 @@ module Rabbitq
 
               timer = EventMachine::PeriodicTimer.new(0.1) do
               if result = AdmitEventMachine::requests_list[corr_id]
+                puts "waiting for " + corr_id
                 block.call(result)
                 timer.cancel
               end

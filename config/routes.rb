@@ -24,4 +24,7 @@ Ruralcloud::Application.routes.draw do
 
   post "challenges/send_compile"
   root :to => "challenges#send_compile"
+
+  post "challenges/send_eval"
+  root :to => "challenges#send_eval"
 end
