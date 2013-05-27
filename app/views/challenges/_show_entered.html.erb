@@ -170,12 +170,14 @@
     $(this).attr("disabled", "disabled");
     $(this).html("Compiling...");
     co.setLine(co.lineCount()-1, "Compiling...");
+    co.setOption("readOnly", true);
     $.post("/challenges/send_compile", {input: editor.getValue(), challenge: <%= @challenge.id %>},
       function(data) {
         co.replaceSelection("\n" + data.responseString, "end", "+input");
         co.replaceSelection("\n" + prompt, "end", "+input");
         $("#compile-button").removeAttr("disabled");
         $("#compile-button").html("Compile");
+        co.setOption("readOnly", false);
       }, "json");
   });
 
