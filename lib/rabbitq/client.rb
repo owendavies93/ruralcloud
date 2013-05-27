@@ -18,6 +18,11 @@ module Rabbitq
 
     def publish(message, block, compile, file)
       begin
+        if compile == 1
+          message = "module " + file + " where\n" + message
+        end
+
+        file = file + ".hs"
         puts message
 
         serialisedMessage = RuralMessage.new
@@ -27,8 +32,6 @@ module Rabbitq
 
         m = ""
         serialisedMessage.encode(m)
-
-        puts m
 
         corr_id = rand(10_000_000).to_s
         AdmitEventMachine::requests_list[corr_id] = nil

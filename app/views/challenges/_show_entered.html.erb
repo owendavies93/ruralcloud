@@ -167,11 +167,15 @@
   co.setSize(null, 300);
 
   $("#compile-button").click(function(){
+    $(this).attr("disabled", "disabled");
+    $(this).html("Compiling...");
     co.setLine(co.lineCount()-1, "Compiling...");
     $.post("/challenges/send_compile", {input: editor.getValue(), challenge: <%= @challenge.id %>},
       function(data) {
         co.replaceSelection("\n" + data.responseString, "end", "+input");
         co.replaceSelection("\n" + prompt, "end", "+input");
+        $("#compile-button").removeAttr("disabled");
+        $("#compile-button").html("Compile");
       }, "json");
   });
 
