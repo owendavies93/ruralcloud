@@ -29,9 +29,13 @@
     <%= link_to 'Enter Challenge', enter_challenge_path, :class => "btn" %>
   <% else %>
     <div id="start-countdown"></div>
+    <div id="chart"></div>
   <% end %>
-<% else %>
+<% elsif !started %>
   <p>Sign in to enter this challenge!</p>
+<% else %>
+  <div id="start-countdown"></div>
+  <div id="chart"></div>
 <% end %>
 
 </div>
@@ -78,4 +82,21 @@
 <script type="text/javascript">
   var endtime = new Date(<%= DateTime.strptime(@challenge.endtime.to_s,"%m-%d-%Y %H:%M").to_i %> * 1000);
   $("#start-countdown").countdown({until: endtime});
+
+  $(function () {
+    new Highcharts.Chart({
+      chart: { renderTo: 'chart' },
+      title: { text: 'Compilations' },
+      yAxis: { type: 'integer' },
+      xAxis: {
+        title: { text: 'Entrant'}
+      },
+      series: [{
+        data: [1, 2, 5, 7, 3]
+      }],
+      credits: {
+        enabled: false
+      },
+    });
+  });
 </script>
