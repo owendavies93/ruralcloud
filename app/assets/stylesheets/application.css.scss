@@ -82,4 +82,12 @@ html, body {
     height: 350px;
 }
 
+.icon-github {
+    background-image: url(/assets/gh14.png);
+    background-position: center center;
+    height: 14px;
+    width: 14px;
+    line-height: 14px;
+}
+
 @import 'bootstrap-responsive';

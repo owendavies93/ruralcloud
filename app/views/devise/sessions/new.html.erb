@@ -13,5 +13,6 @@
     </div>
   <% end -%>
 
-  <div><%= f.submit "Sign in" %></div>
+  <div><%= f.submit "Sign in", :class => "btn" %> or <%= link_to '<i class="icon-github"></i> Sign in with GitHub'.html_safe, user_omniauth_authorize_path(:github), :class => "btn" %>
+</div>
 <% end %>
