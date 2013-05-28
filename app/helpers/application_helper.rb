@@ -1,11 +1,16 @@
+require "net/http"
+
 module ApplicationHelper
   def gravatar user
-    gravatar_id = Digest::MD5::hexdigest(user.email).downcase
-    "http://gravatar.com/avatar/#{gravatar_id}.png?s=64"
+    avatar user, 64
   end
 
   def gravatar_small user
+    avatar user, 28
+  end
+
+  def avatar user, size
     gravatar_id = Digest::MD5::hexdigest(user.email).downcase
-    "http://gravatar.com/avatar/#{gravatar_id}.png?s=28"
+    "http://gravatar.com/avatar/#{gravatar_id}.png?s=#{size}&f=y&d=identicon"
   end
 end
