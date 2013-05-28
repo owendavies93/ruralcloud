@@ -59,13 +59,23 @@
 
 <% if !started %>
 
-  var starttime = new Date(<%= DateTime.strptime(@challenge.starttime.to_s,"%m-%d-%Y %H:%M").to_i %> * 1000);
+  <% now = Time.new %>
+  var starttime = <%= @challenge.starttime.minus_with_coercion(now) %>;
   $("#start-countdown").countdown({until: starttime});
+
+  setTimeout(function() {
+    location.reload();
+  }, starttime * 1000);
 
 <% elsif !ended %>
 
-  var endtime = new Date(<%= DateTime.strptime(@challenge.endtime.to_s,"%m-%d-%Y %H:%M").to_i %> * 1000);
+  <% now = Time.new %>
+  var endtime = <%= @challenge.endtime.minus_with_coercion(now) %>;
   $("#start-countdown").countdown({until: endtime});
+
+  setTimeout(function() {
+    location.reload();
+  }, endtime * 1000);
 
 <% end %>
 
