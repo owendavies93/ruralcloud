@@ -72,7 +72,8 @@ html, body {
 }
 
 .log {
-    height: 400px;
+    font-size: 10pt;
+    height: 550px;
     overflow: auto;
 }
 
@@ -167,5 +168,17 @@ html, body {
   letter-spacing: -1px;
 }
 
+#chart {
+    margin-top: 50px;
+    height: 350px;
+}
+
+.icon-github {
+    background-image: url(/assets/gh14.png);
+    background-position: center center;
+    height: 14px;
+    width: 14px;
+    line-height: 14px;
+}
 
 @import 'bootstrap-responsive';

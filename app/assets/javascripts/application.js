@@ -19,3 +19,4 @@
 //= require codemirror
 //= require haskell
 //= require sugar-1.3.9.min
+//= require highcharts

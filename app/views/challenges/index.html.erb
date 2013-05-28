@@ -21,7 +21,7 @@
     <td><%= challenge.difficulty %></td>
     <td><%= challenge.starttime %></td>
     <td><%= challenge.endtime %></td>
-    <td><%= challenge.users.count %></td>
+    <td><%= challenge.entries.length %></td>
     <td><%= challenge.owner %></td>
     <td><%= link_to 'Show', challenge, :class => "btn btn-small" %></td>
     <% if current_user.try(:admin?) %>

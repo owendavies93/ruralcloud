@@ -1,0 +1,7 @@
+development:
+    github_key: 9bfc34f867abe6cbb7ca
+    github_secret: 0ed559a20b553b9130c2ea847e30fc04858af5f2
+
+production:
+    github_key: 88f90438c0adf361eb3f
+    github_secret: b0f172243338e6e3d24d7ab97828f547423fe4c3

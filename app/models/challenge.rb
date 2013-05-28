@@ -2,9 +2,10 @@ class Challenge < ActiveRecord::Base
   validates :description, :owner, :spec, :presence => true
   validates :difficulty, :inclusion => {:in => 0..10, :message => "isn't between 1 and 10"}
   validate :not_in_past, :later_than_start, :not_invalid
-  attr_accessible :description, :difficulty, :endtime, :owner, :spec, :starttime
+  attr_accessible :description, :difficulty, :endtime, :owner, :spec, :starttime, :log
 
-  has_and_belongs_to_many :users
+  has_many :entries
+  has_many :users, :through => :entries
 
   def not_in_past
     if !starttime.blank? and starttime < DateTime.now

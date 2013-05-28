@@ -59,13 +59,23 @@
 
 <% if !started %>
 
-  var starttime = new Date(<%= DateTime.strptime(@challenge.starttime.to_s,"%m-%d-%Y %H:%M").to_i %> * 1000);
+  <% now = Time.new %>
+  var starttime = <%= @challenge.starttime.minus_with_coercion(now) %>;
   $("#start-countdown").countdown({until: starttime});
+
+  setTimeout(function() {
+    location.reload();
+  }, starttime * 1000);
 
 <% elsif !ended %>
 
-  var endtime = new Date(<%= DateTime.strptime(@challenge.endtime.to_s,"%m-%d-%Y %H:%M").to_i %> * 1000);
+  <% now = Time.new %>
+  var endtime = <%= @challenge.endtime.minus_with_coercion(now) %>;
   $("#start-countdown").countdown({until: endtime});
+
+  setTimeout(function() {
+    location.reload();
+  }, endtime * 1000);
 
 <% end %>
 
@@ -77,6 +87,7 @@
       theme: "<%= current_user.editor_theme %>"
     });
 
+  editor.setValue("<%= get_entry(@challenge.id).last_code %>");
 
   var used = new Array();
   var history = new Array();
@@ -174,7 +185,7 @@
       $(this).html("Compiling...");
       co.setLine(co.lineCount()-1, "Compiling...");
       co.setOption("readOnly", true);
-      $.post("/challenges/send_compile", {input: editor.getValue(), challenge: <%= @challenge.id %>},
+      $.post("/challenges/send_compile", {input: editor.getValue(), challenge: <%= @challenge.id %>, lines: editor.lineCount(), length: editor.getValue().length},
         function(data) {
           co.replaceSelection("\n" + data.responseString, "end", "+input");
           co.replaceSelection("\n" + prompt, "end", "+input");

@@ -11,7 +11,8 @@ Ruralcloud::Application.routes.draw do
              :path_names => { :sign_up  => "register",
                               :sign_in  => "login",
                               :sign_out => "logout"
-                            }
+                            },
+             :controllers => { :omniauth_callbacks => "users/omniauth_callbacks" }
 
   get "home/index"
   root :to => 'home#index'
@@ -27,4 +28,7 @@ Ruralcloud::Application.routes.draw do
 
   post "challenges/send_eval"
   root :to => "challenges#send_eval"
+
+  get "challenges/save_code"
+  root :to => "challenges#save_code"
 end

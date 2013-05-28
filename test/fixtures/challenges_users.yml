@@ -1,0 +1,11 @@
+# Read about fixtures at http://api.rubyonrails.org/classes/ActiveRecord/Fixtures.html
+
+one:
+  number_lines: 1
+  code_length: 1
+  compilations: 1
+
+two:
+  number_lines: 1
+  code_length: 1
+  compilations: 1

@@ -12,11 +12,11 @@ module Rabbitq
   class Client
     attr_accessor :thread
 
-    def self.publish(message, block, compile, file)
-      new.publish(message, block, compile, file)
+    def self.publish(message, block, compile, file, challenge)
+      new.publish(message, block, compile, file, challenge)
     end
 
-    def publish(message, block, compile, file)
+    def publish(message, block, compile, file, challenge)
       begin
         if compile == 1
           message = "module " + file + " where\n" + message
@@ -50,7 +50,7 @@ module Rabbitq
               timer = EventMachine::PeriodicTimer.new(0.1) do
               if result = AdmitEventMachine::requests_list[corr_id]
                 puts "waiting for " + corr_id
-                block.call(result)
+                block.call(result, challenge)
                 timer.cancel
               end
             end

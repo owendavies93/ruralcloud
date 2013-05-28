@@ -92,28 +92,63 @@ class ChallengesController < ApplicationController
   end
 
   def send_compile
-    puts "compile"
-    puts params
-    Rabbitq::Client::publish(params[:input], self, 1, "M" + params[:challenge] + "_" + current_user.id.to_s)
+    @entry = get_entry(params[:challenge])
+    @entry.update_attributes(:compilations =>  @entry.compilations + 1, :length => params[:length], :lines => params[:lines], :last_code => params[:input])
+    filename = "M" + params[:challenge] + "_" + current_user.id.to_s
+    Rabbitq::Client::publish(params[:input], self, 1, filename, params[:challenge])
     throw :async
   end
 
   def send_eval
-    puts "eval"
-    puts params
-    Rabbitq::Client::publish(params[:input], self, 0, "M" + params[:challenge] + "_" + current_user.id.to_s)
+    @entry = get_entry(params[:challenge])
+    @entry.update_attributes(:evaluations => @entry.evaluations + 1)
+    filename = "M" + params[:challenge] + "_" + current_user.id.to_s
+    Rabbitq::Client::publish(params[:input], self, 0, filename, params[:challenge])
     throw :async
   end
 
-  def call(result)
+  def call(result, challenge)
+    cur_challenge = Challenge.find(challenge)
     request.env['async.callback'].call [200, {'Content-Type' => 'text/plain'}, result]
+    res = JSON.parse(result)
+
+    if res["status"].to_i == -1
+      log("POTENTIAL SERVER ATTACK", challenge)
+    end
+
+    if res["isCompileJob"]
+      if res["status"].to_i > 0
+        failed_compilation(cur_challenge.id)
+        log("Failed compilation", challenge)
+      else
+        log("Successful compilation", challenge)
+      end
+    else
+      if res["status"].to_i > 0
+        failed_eval(cur_challenge.id)
+        log("Failed evaluation", challenge)
+      else
+        log("Successful evaluation", challenge)
+      end
+    end
   end
+
+  def log message, challenge
+    cur_challenge = Challenge.find(challenge)
+    now = Time.new
+    cur_challenge.update_attribute("log", now.inspect + ": " + message + " - " + current_user.email + "\n" + cur_challenge.log )
+  end
+
+  def get_entry challenge_id
+    return Entry.find(:first, :conditions => {:user_id => current_user.id, :challenge_id => challenge_id})
+  end
+  helper_method :get_entry
 
   private
     def is_entered challenge
       if user_signed_in?
-        challenge.users.each { |u|
-          if u.email == current_user.email
+        @challenge.entries.each { |e|
+          if e.user_id == current_user.id
             return true
           end
         }
@@ -126,15 +161,25 @@ class ChallengesController < ApplicationController
 
     def has_started challenge
       now = Time.new
-
       return challenge.starttime < now.inspect
     end
     helper_method :has_started
 
     def has_ended challenge
       now = Time.new
-
       return challenge.endtime < now.inspect
     end
     helper_method :has_ended
+
+    def failed_eval challenge_id
+      @entry = get_entry(challenge_id)
+      @entry.update_attributes(:failed_evaluations => @entry.failed_evaluations + 1)
+    end
+    helper_method :failed_eval
+
+    def failed_compilation challenge_id
+      @entry = get_entry(challenge_id)
+      @entry.update_attributes(:failed_compilations => @entry.failed_compilations + 1)
+    end
+    helper_method :failed_compilation
 end
