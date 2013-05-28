@@ -1,8 +1,12 @@
 class Challenge < ActiveRecord::Base
-  validates :description, :owner, :spec, :presence => true
+  validates :description, :owner, :spec, :test_suite, :presence => true
   validates :difficulty, :inclusion => {:in => 0..10, :message => "isn't between 1 and 10"}
   validate :not_in_past, :later_than_start, :not_invalid
-  attr_accessible :description, :difficulty, :endtime, :owner, :spec, :starttime, :log
+  attr_accessible :description, :difficulty, :endtime, :owner, :spec, :starttime, :log, :test_suite
+
+  has_attached_file :test_suite
+  validates_attachment :test_suite, :presence => true, :content_type => { :content_type => "text/plain" }
+  before_save :valid_test_suite
 
   has_many :entries
   has_many :users, :through => :entries
@@ -28,6 +32,14 @@ class Challenge < ActiveRecord::Base
     end
     if endtime == nil
       errors.add(:endtime, "End time supplied was not valid")
+    end
+  end
+
+  def valid_test_suite
+    File.open(test_suite.queued_for_write[:original].path) do |f|
+      f.each do |l|
+        puts l
+      end
     end
   end
 

@@ -37,7 +37,11 @@ gem 'thin'
 gem 'omniauth'
 gem 'omniauth-github'
 
-gem 'certified' # Forces ruby to know location of SSL certificates
+# Forces ruby to know location of SSL certificates
+gem 'certified'
+
+# File upload
+gem 'paperclip'
 
 # To use ActiveModel has_secure_password
 # gem 'bcrypt-ruby', '~> 3.0.0'

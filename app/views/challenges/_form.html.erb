@@ -1,4 +1,4 @@
-<%= form_for(@challenge) do |f| %>
+<%= form_for @challenge, :html => { :multipart => true } do |f| %>
   <% if @challenge.errors.any? %>
     <div id="error_explanation">
       <h2><%= pluralize(@challenge.errors.count, "error") %> prohibited this challenge from being saved:</h2>
@@ -31,9 +31,17 @@
   </div>
   <br/>
   <div class="field">
+    Test suite file:<br/>
+    <div class="fileupload fileupload-new" data-provides="fileupload">
+      <div class="input-append">
+        <div class="uneditable-input span3"><i class="icon-file fileupload-exists"></i> <span class="fileupload-preview"></span></div><span class="btn btn-file"><span class="fileupload-new">Select file</span><span class="fileupload-exists">Change</span><input name="challenge[test_suite]" type="file" /></span><a href="#" class="btn fileupload-exists" data-dismiss="fileupload">Remove</a>
+      </div>
+    </div>
+  </div>
+  <div class="field">
     <div id="start_date_creator" class="control-group">
       <p class="creator">
-        <%= f.label :starttime %>
+        Start time:<br/>
         <input class="input" placeholder='tomorrow at 1pm' type="text" size="30">
         <%= f.hidden_field :starttime, :class =>"date_output" %>
         <span class="output"></span>
@@ -43,7 +51,7 @@
   <div class="field">
     <div id="end_date_creator" class="control-group">
       <p class="creator">
-        <%= f.label :endtime %>
+        End time:<br/>
         <input class="input" placeholder='tomorrow at 2pm' type="text" size="30">
         <%= f.hidden_field :endtime, :class =>"date_output" %>
         <span class="output"></span>
