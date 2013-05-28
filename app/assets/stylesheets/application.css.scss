@@ -73,8 +73,13 @@ html, body {
 
 .log {
     font-size: 10pt;
-    height: 450px;
+    height: 550px;
     overflow: auto;
+}
+
+#chart {
+    margin-top: 50px;
+    height: 350px;
 }
 
 @import 'bootstrap-responsive';

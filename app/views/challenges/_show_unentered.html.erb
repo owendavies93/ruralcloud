@@ -85,14 +85,39 @@
 
   $(function () {
     new Highcharts.Chart({
-      chart: { renderTo: 'chart' },
-      title: { text: 'Compilations' },
-      yAxis: { type: 'integer' },
+      chart: {
+        renderTo: 'chart',
+        type: 'column'
+      },
+      title: { text: '' },
       xAxis: {
-        title: { text: 'Entrant'}
+        categories: [
+          <% for user in @challenge.users %>
+            <% if user != @challenge.users.last %>
+              '<%= sanitize user.email %>',
+            <% else %>
+              '<%= sanitize user.email %>'
+            <% end %>
+          <% end %>
+        ]
+      },
+      yAxis: {
+        title: { text: 'Compilations' },
+        type: 'integer'
       },
       series: [{
-        data: [1, 2, 5, 7, 3]
+        showInLegend: false,
+        name: 'Compilations',
+        data: [
+          <% for user in @challenge.users %>
+            <% entry = Entry.find(:first, :conditions => {user_id: user.id, challenge_id: @challenge.id}) %>
+            <% if user != @challenge.users.last %>
+              <%= entry.compilations %>,
+            <% else %>
+              <%= entry.compilations %>
+            <% end %>
+          <% end %>
+        ]
       }],
       credits: {
         enabled: false
