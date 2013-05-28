@@ -93,7 +93,7 @@ class ChallengesController < ApplicationController
 
   def send_compile
     @entry = get_entry(params[:challenge])
-    @entry.update_attributes(:compilations =>  @entry.compilations + 1, :length => params[:length], :lines => params[:lines])
+    @entry.update_attributes(:compilations =>  @entry.compilations + 1, :length => params[:length], :lines => params[:lines], :last_code => params[:input])
     filename = "M" + params[:challenge] + "_" + current_user.id.to_s
     Rabbitq::Client::publish(params[:input], self, 1, filename, params[:challenge])
     throw :async
@@ -142,6 +142,7 @@ class ChallengesController < ApplicationController
   def get_entry challenge_id
     return Entry.find(:first, :conditions => {:user_id => current_user.id, :challenge_id => challenge_id})
   end
+  helper_method :get_entry
 
   private
     def is_entered challenge
