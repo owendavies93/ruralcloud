@@ -16,3 +16,5 @@
   <div><%= f.submit "Sign in", :class => "btn" %> or <%= link_to '<i class="icon-github"></i> Sign in with GitHub'.html_safe, user_omniauth_authorize_path(:github), :class => "btn" %>
 </div>
 <% end %>
+
+  <%= link_to "Forgot your password?", new_password_path(resource_name) %><br />
