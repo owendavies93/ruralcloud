@@ -5,6 +5,8 @@ Ruralcloud::Application.routes.draw do
   # extra route for adding user to challenge
   match "/challenges/enter/:id" => "challenges#enter", :as => :enter_challenge
 
+  match "/leaderboards/:id" => "challenges#leaderboard"
+
   # custom routes for devise user stuff
   devise_for :users,
              :path => "",

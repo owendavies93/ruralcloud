@@ -1,0 +1,45 @@
+<% ended = has_ended(@challenge) %>
+<% if ended %>
+  <h3>Leaderboard for Challenge #<%= @challenge.id %></h3>
+
+  <table class="table table-striped">
+    <tr>
+      <th>User</th>
+      <th>Compilations</th>
+      <th>Failed %</th>
+      <th>Evaluations</th>
+      <th>Failed %</th>
+      <th>Code Length</th>
+      <th>Lines</th>
+      <th>Test Suite Score</th>
+    </tr>
+
+    <% @challenge.entries.each do |entry| %>
+    <tr>
+      <td><%= sanitize User.find(:first, :conditions => {id: entry.user_id}).email %></td>
+      <td><%= entry.compilations %></td>
+      <td>
+        <% if entry.compilations > 0 %>
+          <%= entry.failed_compilations / entry.compilations / 1 * 100 %>
+        <% else %>
+          0
+        <% end %>
+      </td>
+      <td><%= entry.evaluations %></td>
+      <td>
+        <% if entry.evaluations > 0 %>
+          <%= entry.failed_evaluations / entry.evaluations / 1 * 100 %>
+        <% else %>
+          0
+        <% end %>
+      </td>
+      <td><%= entry.length %></td>
+      <td><%= entry.lines %></td>
+      <td>TODO</td>
+    </tr>
+    <% end %>
+
+  </table>
+<% else %>
+  <p>The leaderboard for this challenge will apear here once the challenge has ended.</p>
+<% end %>

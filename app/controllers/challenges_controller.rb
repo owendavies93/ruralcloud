@@ -91,6 +91,10 @@ class ChallengesController < ApplicationController
     redirect_to :back, :notice => "You have entered this challenge!"
   end
 
+  def leaderboard
+    @challenge = Challenge.find(params[:id])
+  end
+
   def send_compile
     @entry = get_entry(params[:challenge])
     @entry.update_attributes(:compilations =>  @entry.compilations + 1, :length => params[:length], :lines => params[:lines], :last_code => params[:input])
