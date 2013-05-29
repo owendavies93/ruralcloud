@@ -14,7 +14,7 @@
       <th>Test Suite Score</th>
     </tr>
 
-    <% @challenge.entries.each do |entry| %>
+    <% @challenge.entries.order("compilations desc").each do |entry| %>
     <tr>
       <td><%= sanitize User.find(:first, :conditions => {id: entry.user_id}).email %></td>
       <td><%= entry.compilations %></td>
