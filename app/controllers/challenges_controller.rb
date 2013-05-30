@@ -91,6 +91,20 @@ class ChallengesController < ApplicationController
     redirect_to :back, :notice => "You have entered this challenge!"
   end
 
+  def global_leaderboard
+    @overalls = Entry.group(:user_id).select(
+      'user_id,
+       SUM(compilations) AS total_comp,
+       SUM(failed_compilations) AS failed_comp,
+       SUM(evaluations) AS total_eval,
+       SUM(failed_evaluations) AS failed_eval,
+       ROUND(AVG(length),2) AS av_length,
+       ROUND(AVG(lines),2) AS av_lines').order("total_comp desc")
+
+    now = Time.new
+    @runnings = Challenge.where('endtime < ?', now.inspect)
+  end
+
   def leaderboard
     @challenge = Challenge.find(params[:id])
   end

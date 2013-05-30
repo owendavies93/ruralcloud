@@ -20,6 +20,7 @@
                 <% if current_user.try(:admin?) %>
                   <li><%= link_to 'Create Challenge', new_challenge_path %></li>
                 <% end %>
+                <li><%= link_to "Leaderboards", global_leaderboard_path %></li>
               <% end %>
             </ul>
               <ul class="nav pull-right">

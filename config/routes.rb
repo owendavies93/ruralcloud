@@ -7,6 +7,8 @@ Ruralcloud::Application.routes.draw do
 
   match "/leaderboards/:id" => "challenges#leaderboard"
 
+  match "/leaderboards" => "challenges#global_leaderboard", :as => :global_leaderboard
+
   # custom routes for devise user stuff
   devise_for :users,
              :path => "",
