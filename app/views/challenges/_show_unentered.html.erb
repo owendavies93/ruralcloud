@@ -30,12 +30,32 @@
   <% else %>
     <div id="start-countdown"></div>
     <div id="chart"></div>
+    <div class="center">
+      <div class="btn-group center">
+        <a class="btn btn-mini" id="backward-button">
+          <i class="icon-chevron-left"></i>
+        </a>
+        <a class="btn btn-mini" id="forward-button">
+          <i class="icon-chevron-right"></i>
+        </a>
+      </div>
+    </div>
   <% end %>
 <% elsif !started %>
   <p>Sign in to enter this challenge!</p>
 <% else %>
   <div id="start-countdown"></div>
   <div id="chart"></div>
+  <div class="center">
+    <div class="btn-group center">
+      <a class="btn btn-mini" id="backward-button">
+        <i class="icon-chevron-left"></i>
+      </a>
+      <a class="btn btn-mini" id="forward-button">
+        <i class="icon-chevron-right"></i>
+      </a>
+    </div>
+  </div>
 <% end %>
 
 </div>
@@ -60,19 +80,8 @@
             <b>Code length: </b><%= entry.length %><br/>
             <b>Lines: </b><%= entry.lines %><br/>
             <b>Realtime test score: </b>TODO<br/>
-            <b>Failed Compilation %: </b>
-            <% if entry.compilations > 0 %>
-              <%= entry.failed_compilations / entry.compilations / 1 * 100 %>
-            <% else %>
-              0
-            <% end %>
-            <br/>
-            <b>Failed Evaluation %: </b>
-            <% if entry.evaluations > 0 %>
-              <%= entry.failed_evaluations / entry.evaluations / 1 * 100 %>
-            <% else %>
-              0
-            <% end %>
+            <b>Failed Compilations: </b><%= entry.failed_compilations %><br/>
+            <b>Failed Evaluations: </b><%= entry.failed_evaluations %><br/>
           </div>
         </div>
       <% end %>
@@ -87,8 +96,13 @@
   var endtime = new Date(<%= DateTime.strptime(@challenge.endtime.to_s,"%m-%d-%Y %H:%M").to_i %> * 1000);
   $("#start-countdown").countdown({until: endtime});
 
+  var dataSets = [<%= @comp %>, <%= @f_comp %>, <%= @eval %>, <%= @f_eval %>, <%= @length %>, <%= @lines %>],
+      titles = ['Compilations', 'Failed Compilations', 'Evaluations', 'Failed Evaluations', 'Code Length', 'Lines'],
+      currentSet = 0,
+      chart;
+
   $(function () {
-    new Highcharts.Chart({
+    chart = new Highcharts.Chart({
       chart: {
         renderTo: 'chart',
         type: 'column'
@@ -106,26 +120,63 @@
         ]
       },
       yAxis: {
-        title: { text: 'Compilations' },
+        title: { text: titles[0] },
         type: 'integer'
       },
       series: [{
         showInLegend: false,
-        name: 'Compilations',
-        data: [
-          <% for user in @challenge.users %>
-            <% entry = Entry.find(:first, :conditions => {user_id: user.id, challenge_id: @challenge.id}) %>
-            <% if user != @challenge.users.last %>
-              <%= entry.compilations %>,
-            <% else %>
-              <%= entry.compilations %>
-            <% end %>
-          <% end %>
-        ]
+        name: titles[0],
+        data: dataSets[0]
       }],
       credits: {
         enabled: false
       },
     });
+  });
+
+  $('#forward-button').click(function() {
+    if (currentSet == dataSets.length - 1) {
+      currentSet = 0;
+      chart.yAxis[0].axisTitle.attr({text: titles[0]});
+      chart.series[0].remove();
+      chart.addSeries({
+        color: "#2f7ed8",
+        showInLegend: false,
+        name: titles[0],
+        data: dataSets[0]
+      });
+    } else {
+      chart.yAxis[0].axisTitle.attr({text: titles[++currentSet]});
+      chart.series[0].remove();
+      chart.addSeries({
+        color: "#2f7ed8",
+        showInLegend: false,
+        name: titles[currentSet],
+        data: dataSets[currentSet]
+      });
+    }
+  });
+
+  $('#backward-button').click(function() {
+    if (currentSet == 0) {
+      currentSet = dataSets.length - 1;
+      chart.yAxis[0].axisTitle.attr({text: titles[dataSets.length - 1]});
+      chart.series[0].remove();
+      chart.addSeries({
+        color: "#2f7ed8",
+        showInLegend: false,
+        name: titles[dataSets.length - 1],
+        data: dataSets[dataSets.length - 1]
+      });
+    } else {
+      chart.yAxis[0].axisTitle.attr({text: titles[--currentSet]});
+      chart.series[0].remove();
+      chart.addSeries({
+        color: "#2f7ed8",
+        showInLegend: false,
+        name: titles[currentSet],
+        data: dataSets[currentSet]
+      });
+    }
   });
 </script>

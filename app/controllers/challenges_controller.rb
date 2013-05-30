@@ -6,7 +6,7 @@ class ChallengesController < ApplicationController
   def index
     now = Time.new
     @not_started = Challenge.where('starttime > ?', now.inspect)
-    @running = Challenge.where('starttime > ? AND endtime < ?', now.inspect, now.inspect)
+    @running = Challenge.where('starttime < ? AND endtime > ?', now.inspect, now.inspect)
 
     respond_to do |format|
       format.html # index.html.erb
@@ -18,6 +18,18 @@ class ChallengesController < ApplicationController
   # GET /challenges/1.json
   def show
     @challenge = Challenge.find(params[:id])
+
+    # This is executed for all shows, but only used in the _show_unentered
+    # partial. Perhaps this is a bad way of doing it, I can't decide
+
+    @entries =Entry.where(:challenge_id => @challenge.id).order("user_id asc")
+
+    @comp   = @entries.pluck(:compilations)
+    @f_comp = @entries.pluck(:failed_compilations)
+    @eval   = @entries.pluck(:evaluations)
+    @f_eval = @entries.pluck(:failed_evaluations)
+    @length = @entries.pluck(:length)
+    @lines  = @entries.pluck(:lines)
 
     respond_to do |format|
       format.html # show.html.erb
