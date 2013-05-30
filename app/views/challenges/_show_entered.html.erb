@@ -48,9 +48,8 @@
           <% end %>
         </blockquote>
       </div>
+      <a class="btn", id="popout">Pop out</a>
     </div>
-
-    <div id="result"></div>
   </div>
 </div>
 
@@ -193,6 +192,31 @@
           $("#compile-button").html("Compile");
           co.setOption("readOnly", false);
         }, "json");
+    }
+  });
+
+  $("#popout").click(function() {
+    if ($(this).text() == "Pop out") {
+      var w = window.open();
+      w.document.open();
+      w.document.write(
+        '<!DOCTYPE html>' +
+        '<html>' +
+          '<head>' +
+            '<title>Specification for Challenge #<%= @challenge.id %></title>' +
+            '<link href="/assets/application.css?body=1" media="all" rel="stylesheet" type="text/css" />' +
+          '</head>'
+        )
+      w.document.write($("#spec").html());
+      w.document.close();
+
+      $("#spec").hide();
+      co.setSize(null, 600);
+      $(this).text("Pop in")
+    } else {
+      $("#spec").show();
+      co.setSize(null, 300);
+      $(this).text("Pop out")
     }
   });
 

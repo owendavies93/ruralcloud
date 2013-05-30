@@ -28,16 +28,15 @@
 
 </table>
 
-View leaderboard for challenge:
-
-<%= select_tag "challenge_id", options_from_collection_for_select(@runnings, 'id', 'id') %>
+View leaderboard for challenge:<br/>
+<%= select_tag "challenge_id", options_from_collection_for_select(@runnings, 'id', 'id'), :include_blank => "" %>
 
 <script type="text/javascript">
   $(function(){
-    $('#challenge_id').bind('change', function () {
+    $('#challenge_id').change(function() {
        var url = "/leaderboards/" + $(this).val()
         if (url) {
-          window.location.replace(url);
+          window.location.assign(url);
         }
         return false;
     });
