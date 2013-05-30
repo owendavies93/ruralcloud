@@ -131,8 +131,13 @@ class ChallengesController < ApplicationController
   # Enters the current user into the challenge
   def enter
     @challenge = Challenge.find(params[:id])
-
     @challenge.users << current_user
+
+    @challenge.users.each do |u|
+      if u.id != current_user.id
+        Pusher['private-' + u.id.to_s].trigger('new_entrant', {:entrant => current_user.email})
+      end
+    end
     redirect_to :back, :notice => "You have entered this challenge!"
   end
 

@@ -33,4 +33,6 @@ Ruralcloud::Application.routes.draw do
 
   get "challenges/save_code"
   root :to => "challenges#save_code"
+
+  post "pusher/auth"
 end

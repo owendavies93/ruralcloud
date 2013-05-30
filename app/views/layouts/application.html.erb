@@ -4,8 +4,35 @@
     <title>Ruralcloud</title>
     <%= stylesheet_link_tag    "application", :media => "all" %>
     <%= javascript_include_tag "application" %>
+    <%= javascript_include_tag "http://js.pusherapp.com/1.9/pusher.min.js" %>
     <%= csrf_meta_tags %>
     <link href='//fonts.googleapis.com/css?family=Inconsolata:400,700' rel='stylesheet' type='text/css'>
+
+    <script type="text/javascript">
+      <% if Rails.env.development? %>
+        Pusher.log = function(message) {
+          if (window.console && window.console.log) {
+            window.console.log(message);
+          }
+        };
+      <% end %>
+
+      <% if user_signed_in? %>
+        var pusher = new Pusher('<%= Pusher.key %>');
+        var user_channel = pusher.subscribe('private-<%= current_user.id %>');
+
+        user_channel.bind('new_entrant', function(data) {
+          msg = data.entrant + " has entered a challenge!";
+          dom_notify(msg);
+        });
+
+        function dom_notify(msg) {
+          $('.top-left').notify({
+            message: { text: msg }
+          }).show();
+        }
+      <% end %>
+    </script>
   </head>
 
   <body>
@@ -44,6 +71,8 @@
       <div class="container">
         <%= yield %>
       </div>
+
+      <div class="notifications top-left"></div>
 
       <div id="push"></div>
     </div>

@@ -1,3 +1,5 @@
+require 'pusher'
+
 Ruralcloud::Application.configure do
   # Settings specified here will take precedence over those in config/application.rb
 
@@ -39,4 +41,8 @@ Ruralcloud::Application.configure do
   config.action_mailer.default_url_options = { :host => 'localhost:9292' }
   config.action_mailer.delivery_method = :smtp
   config.action_mailer.smtp_settings = {:address => "localhost", :port => 1025}
+
+  Pusher.app_id = '45313'
+  Pusher.key    = '2b4b300f074a5102bce6'
+  Pusher.secret = 'fe3e8b2b92136504df82'
 end
