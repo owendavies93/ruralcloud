@@ -16,15 +16,13 @@ Ruralcloud::Application.routes.draw do
                               :sign_in  => "login",
                               :sign_out => "logout"
                             },
-             :controllers => { :omniauth_callbacks => "users/omniauth_callbacks" }
+             :controllers => { :omniauth_callbacks => "users/omniauth_callbacks",
+                               :registrations => "registrations" }
 
   get "home/index"
   root :to => 'home#index'
 
   post "home/index"
-  root :to => 'home#index'
-
-  post "home/send_message"
   root :to => 'home#index'
 
   post "challenges/send_compile"
