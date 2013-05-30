@@ -23,17 +23,20 @@
                 <li><%= link_to "Leaderboards", global_leaderboard_path %></li>
               <% end %>
             </ul>
-              <ul class="nav pull-right">
-                <% if user_signed_in? %>
-                  <li class="avatar"><%= image_tag gravatar_small(current_user) %></li>
-                  <li><a href="#">Logged in as <%= sanitize current_user.email %></a></li>
-                  <li><%= link_to "Account Settings", edit_user_registration_path %></li>
-                  <li><%= link_to "Logout", destroy_user_session_path %></li>
-                <% else %>
-                  <li><%= link_to "Login", new_user_session_path %></li>
-                  <li><%= link_to "Register", new_user_registration_path %></li>
-                <% end %>
-              </ul>
+            <ul class="nav">
+              <li class="next-challenge center"><a>Next challenge starts in <%= get_next_start_time %></a></li>
+            </ul>
+            <ul class="nav pull-right">
+              <% if user_signed_in? %>
+                <li class="avatar"><%= image_tag gravatar_small(current_user) %></li>
+                <li><a href="#">Logged in as <%= sanitize current_user.email %></a></li>
+                <li><%= link_to "Account Settings", edit_user_registration_path %></li>
+                <li><%= link_to "Logout", destroy_user_session_path %></li>
+              <% else %>
+                <li><%= link_to "Login", new_user_session_path %></li>
+                <li><%= link_to "Register", new_user_registration_path %></li>
+              <% end %>
+            </ul>
           </div>
         </div>
       </div>
