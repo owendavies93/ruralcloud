@@ -22,13 +22,21 @@
         var user_channel = pusher.subscribe('private-<%= current_user.id %>');
 
         user_channel.bind('new_entrant', function(data) {
-          msg = data.entrant + " has entered a challenge!";
+          msg = data.entrant + ' has entered <a href="/challenges/' + data.id + '>a challenge you are in</a>.';
           dom_notify(msg);
         });
 
+        <% if current_user.try(:admin?) %>
+          user_channel.bind('admin_entrant', function(data) {
+            msg = data.entrant + 'has entered <a href="/challenges/' + data.id + '>your challenge</a>!';
+            dom_notify(msg);
+          });
+        <% end %>
+
         function dom_notify(msg) {
-          $('.top-left').notify({
+          $('.bottom-left').notify({
             message: { text: msg }
+            fadeOut: { enabled: true, delay: 3000 }
           }).show();
         }
       <% end %>
@@ -72,7 +80,7 @@
         <%= yield %>
       </div>
 
-      <div class="notifications top-left"></div>
+      <div class="notifications bottom-left"></div>
 
       <div id="push"></div>
     </div>

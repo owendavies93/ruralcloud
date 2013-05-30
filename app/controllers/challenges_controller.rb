@@ -135,9 +135,12 @@ class ChallengesController < ApplicationController
 
     @challenge.users.each do |u|
       if u.id != current_user.id
-        Pusher['private-' + u.id.to_s].trigger('new_entrant', {:entrant => current_user.email})
+        Pusher['private-' + u.id.to_s].trigger('new_entrant', {:entrant => current_user.email, :id => @challenge.id.to_s})
       end
     end
+
+    @owner = User.find(:first, :conditions => {:user_email => @challenge.owner})
+    Pusher['private-' + @owner.id.to_s].trigger('admin-entrant', {:entrant => current_user.email, :id => @challenge.id.to_s})
     redirect_to :back, :notice => "You have entered this challenge!"
   end
 
