@@ -4,7 +4,9 @@ class ChallengesController < ApplicationController
   # GET /challenges
   # GET /challenges.json
   def index
-    @challenges = Challenge.all
+    now = Time.new
+    @not_started = Challenge.where('starttime > ?', now.inspect)
+    @running = Challenge.where('starttime > ? AND endtime < ?', now.inspect, now.inspect)
 
     respond_to do |format|
       format.html # index.html.erb
@@ -133,7 +135,7 @@ class ChallengesController < ApplicationController
        ROUND(AVG(lines),2) AS av_lines').order("total_comp desc")
 
     now = Time.new
-    @runnings = Challenge.where('endtime < ?', now.inspect)
+    @ended = Challenge.where('endtime < ?', now.inspect)
   end
 
   def leaderboard

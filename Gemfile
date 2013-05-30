@@ -40,6 +40,7 @@ gem 'omniauth-github'
 # Forces ruby to know location of SSL certificates
 gem 'certified'
 
+gem 'devise_security_extension'
 
 # To use ActiveModel has_secure_password
 # gem 'bcrypt-ruby', '~> 3.0.0'
