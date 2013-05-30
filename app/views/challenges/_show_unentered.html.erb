@@ -1,6 +1,9 @@
 <% started = has_started(@challenge)
    ended = has_ended(@challenge) %>
 
+<% now = Time.new %>
+<%= @challenge.endtime.minus_with_coercion(now) %>
+
 <% if started %>
   <p>Administration Panel</p>
 <% end %>
@@ -93,8 +96,13 @@
 </div>
 
 <script type="text/javascript">
-  var endtime = new Date(<%= DateTime.strptime(@challenge.endtime.to_s,"%m-%d-%Y %H:%M").to_i %> * 1000);
+  <% now = Time.new %>
+  var endtime = <%= @challenge.endtime.minus_with_coercion(now) %>;
   $("#start-countdown").countdown({until: endtime});
+
+  setTimeout(function() {
+    location.reload();
+  }, endtime * 1000);
 
   var dataSets = [<%= @comp %>, <%= @f_comp %>, <%= @eval %>, <%= @f_eval %>, <%= @length %>, <%= @lines %>],
       titles = ['Compilations', 'Failed Compilations', 'Evaluations', 'Failed Evaluations', 'Code Length', 'Lines'],
