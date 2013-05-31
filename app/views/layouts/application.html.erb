@@ -5,6 +5,7 @@
     <%= stylesheet_link_tag    "application", :media => "all" %>
     <%= javascript_include_tag "application" %>
     <%= javascript_include_tag "http://js.pusherapp.com/1.9/pusher.min.js" %>
+    <%= javascript_include_tag Sync.adapter_javascript_url %>
     <%= csrf_meta_tags %>
     <link href='//fonts.googleapis.com/css?family=Inconsolata:400,700' rel='stylesheet' type='text/css'>
 
@@ -35,7 +36,7 @@
 
         function dom_notify(msg) {
           $('.bottom-left').notify({
-            message: { text: msg }
+            message: { text: msg },
             fadeOut: { enabled: true, delay: 3000 }
           }).show();
         }

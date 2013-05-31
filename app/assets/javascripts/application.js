@@ -22,3 +22,4 @@
 //= require highcharts
 //= require bootstrap-fileupload.min
 //= require bootstrap-notify
+//= require sync

@@ -1,9 +1,6 @@
 <% started = has_started(@challenge)
    ended = has_ended(@challenge) %>
 
-<% now = Time.new %>
-<%= @challenge.endtime.minus_with_coercion(now) %>
-
 <% if started %>
   <p>Administration Panel</p>
 <% end %>

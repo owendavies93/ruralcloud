@@ -16,9 +16,17 @@
     </tr>
   </thead>
 
-  <tbody>
-    <%= render partial: 'pending_challenge_row', collection: @not_started, as: :challenge %>
-  </tbody>
+  <% if current_user.try(:admin?) %>
+    <tbody>
+      <%= sync partial: 'admin_challenge_row', collection: @not_started, as: :challenge %>
+      <%= sync_new partial: 'admin_challenge_row', resource: Challenge.new, direction: :append %>
+    </tbody>
+  <% else %>
+    <tbody>
+      <%= sync partial: 'pending_challenge_row', collection: @not_started, as: :challenge %>
+      <%= sync_new partial: 'pending_challenge_row', resource: Challenge.new, direction: :append %>
+    </tbody>
+  <% end %>
 </table>
 
 
@@ -37,7 +45,7 @@
   </thead>
 
   <tbody>
-    <%= render partial: 'started_challenge_row', collection: @running, as: :challenge %>
+    <%= sync partial: 'started_challenge_row', collection: @running, as: :challenge %>
   </tbody>
 
 </table>

@@ -87,6 +87,7 @@ class ChallengesController < ApplicationController
     respond_to do |format|
       if !added_to_errors
         if @challenge.save
+          sync_new @challenge
           format.html { redirect_to @challenge, notice: 'Challenge was successfully created.' }
           format.json { render json: @challenge, status: :created, location: @challenge }
         else
@@ -107,6 +108,7 @@ class ChallengesController < ApplicationController
 
     respond_to do |format|
       if @challenge.update_attributes(params[:challenge])
+        sync @challenge, :update
         format.html { redirect_to @challenge, notice: 'Challenge was successfully updated.' }
         format.json { head :no_content }
       else
@@ -121,6 +123,8 @@ class ChallengesController < ApplicationController
   def destroy
     @challenge = Challenge.find(params[:id])
     @challenge.destroy
+
+    sync @challenge, :destroy
 
     respond_to do |format|
       format.html { redirect_to challenges_url }

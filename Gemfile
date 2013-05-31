@@ -43,6 +43,7 @@ gem 'certified'
 
 # pusher for notifcations
 gem 'pusher'
+gem 'sync'
 
 # To use ActiveModel has_secure_password
 # gem 'bcrypt-ruby', '~> 3.0.0'
