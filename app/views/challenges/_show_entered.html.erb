@@ -93,7 +93,7 @@
       theme: "<%= current_user.editor_theme %>"
     });
 
-  editor.setValue("<%= get_entry(@challenge.id).last_code %>");
+  editor.setValue("<%= escape_javascript(get_entry(@challenge.id).last_code.html_safe) %>");
 
   var used = new Array();
   var history = new Array();
@@ -193,7 +193,8 @@
       co.setOption("readOnly", true);
       $.post("/challenges/send_compile", {input: editor.getValue(), challenge: <%= @challenge.id %>, lines: editor.lineCount(), length: editor.getValue().length},
         function(data) {
-          co.replaceSelection("\n" + data.responseString, "end", "+input");
+          var print = !data.status? "Success!" : data.responseString;
+          co.replaceSelection("\n" + print, "end", "+input");
           co.replaceSelection("\n" + prompt, "end", "+input");
           $("#compile-button").removeAttr("disabled");
           $("#compile-button").html("Compile");
