@@ -1,5 +1,7 @@
 <% started = has_started(@challenge)
-   ended = has_ended(@challenge) %>
+   ended = has_ended(@challenge)
+   submitted = has_submitted(@challenge) %>
+
 <div class="info">
   <% if !started %>
     <p>This challenge starts in:</p>
@@ -15,7 +17,10 @@
   <div class="row-fluid">
     <div class="span6">
         <textarea rows="30" id="editor" placeholder=""></textarea>
-        <a id="compile-button" class="btn btn-primary pull-right">Compile</a>
+        <a id="compile-button" class="btn btn-primary pull-right" disabled="disabled" >Compile</a>
+        <% if started && !ended %>
+          <%= link_to 'Submit', submit_challenge_path, method: :post, remote: true, :class => "btn btn-danger pull-left", :id => "submit-button", data: { confirm: 'Are you sure you want to submit? You will not be able to edit your code once you have!'} %>
+        <% end %>
     </div>
     <div class="span6">
       <div class="row-fluid codewrapper">
@@ -76,13 +81,15 @@
     location.reload();
   }, endtime * 1000);
 
+  $("#compile-button").removeAttr("disabled");
+
 <% end %>
 
   var editor = CodeMirror.fromTextArea(document.getElementById('editor'), {
       mode: "haskell",
       lineNumbers: true,
       tabSize: 2,
-      readOnly: "<%= started && !ended ? "" : "nocursor" %>",
+      readOnly: "<%= started && !ended && !submitted  ? "" : "nocursor" %>",
       theme: "<%= current_user.editor_theme %>"
     });
 
@@ -99,7 +106,7 @@
 
   var co = CodeMirror.fromTextArea(document.getElementById('console'), {
       mode: "shell",
-      readOnly: "<%= started && !ended ? "" : "nocursor" %>",
+      readOnly: "<%= started && !ended && !submitted ? "" : "nocursor" %>",
       dragDrop: false,
       keyMap: "conmap",
       lineWrapping: true,
@@ -219,5 +226,19 @@
       $(this).text("Pop out")
     }
   });
+
+  <% if !submitted %>
+    user_channel.bind('self_submitted', function() {
+      editor.setOption("readOnly", "nocursor");
+      co.setOption("readOnly", "nocursor");
+      $("#compile-button").attr("disabled", "disabled");
+      $("#submit-button").html("You've submitted!");
+      $("#submit-button").attr("disabled", "disabled");
+    });
+  <% else %>
+    $("#compile-button").attr("disabled", "disabled");
+    $("#submit-button").html("You've submitted!");
+    $("#submit-button").attr("disabled", "disabled");
+  <% end %>
 
 </script>

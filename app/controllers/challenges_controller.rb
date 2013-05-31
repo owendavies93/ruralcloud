@@ -4,7 +4,7 @@ class ChallengesController < ApplicationController
   # GET /challenges
   # GET /challenges.json
   def index
-    now = Time.new
+    now = Time.new.utc
     @not_started = Challenge.where('starttime > ?', now.inspect)
     @running = Challenge.where('starttime < ? AND endtime > ?', now.inspect, now.inspect)
 
@@ -143,8 +143,8 @@ class ChallengesController < ApplicationController
       end
     end
 
-    @owner = User.find(:first, :conditions => {:user_email => @challenge.owner})
-    Pusher['private-' + @owner.id.to_s].trigger('admin-entrant', {:entrant => current_user.email, :id => @challenge.id.to_s})
+    @owner = User.find(:first, :conditions => {:email => @challenge.owner})
+    Pusher['private-' + @owner.id.to_s].trigger('admin_entrant', {:entrant => current_user.email, :id => @challenge.id.to_s})
     redirect_to :back, :notice => "You have entered this challenge!"
   end
 
@@ -164,6 +164,28 @@ class ChallengesController < ApplicationController
 
   def leaderboard
     @challenge = Challenge.find(params[:id])
+  end
+
+  def submit
+    @entry = get_entry(params[:id])
+    @challenge = Challenge.find(params[:id])
+    @entry.update_attribute("submitted", true)
+
+    @challenge.users.each do |u|
+      if u.id != current_user.id
+        Pusher['private-' + u.id.to_s].trigger('entrant_submitted', {:entrant => current_user.email, :id => @challenge.id.to_s})
+      end
+    end
+
+    @owner = User.find(:first, :conditions => {:email => @challenge.owner})
+    Pusher['private-' + @owner.id.to_s].trigger('admin_submitted', {:entrant => current_user.email, :id => @challenge.id.to_s})
+
+    # Send message to self, to close down interface
+    Pusher['private-' + current_user.id.to_s].trigger('self_submitted', {})
+
+    respond_to do |format|
+      format.js {}
+    end
   end
 
   def send_compile
@@ -245,6 +267,11 @@ class ChallengesController < ApplicationController
       return challenge.endtime < now.inspect
     end
     helper_method :has_ended
+
+    def has_submitted challenge
+      return get_entry(challenge).submitted
+    end
+    helper_method :has_submitted
 
     def failed_eval challenge_id
       @entry = get_entry(challenge_id)

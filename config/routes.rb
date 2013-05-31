@@ -5,6 +5,8 @@ Ruralcloud::Application.routes.draw do
   # extra route for adding user to challenge
   match "/challenges/enter/:id" => "challenges#enter", :as => :enter_challenge
 
+  match "/challenges/submit/:id" => "challenges#submit", :as => :submit_challenge
+
   match "/leaderboards/:id" => "challenges#leaderboard"
 
   match "/leaderboards" => "challenges#global_leaderboard", :as => :global_leaderboard
@@ -30,9 +32,6 @@ Ruralcloud::Application.routes.draw do
 
   post "challenges/send_eval"
   root :to => "challenges#send_eval"
-
-  get "challenges/save_code"
-  root :to => "challenges#save_code"
 
   post "pusher/auth"
 end

@@ -3,7 +3,7 @@ class ApplicationController < ActionController::Base
   protect_from_forgery
 
   def get_next_start_time
-    now = Time.new
+    now = Time.new.utc
     @next_challenge = Challenge.where('starttime > ?', now.inspect).order("starttime asc").first
 
     if @next_challenge == nil
