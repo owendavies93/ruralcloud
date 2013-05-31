@@ -64,7 +64,7 @@
             <ul class="nav pull-right">
               <% if user_signed_in? %>
                 <li class="avatar"><%= image_tag gravatar_small(current_user) %></li>
-                <li><a href="#">Logged in as <%= sanitize current_user.email %></a></li>
+                <li><a>Logged in as <%= sanitize current_user.email %></a></li>
                 <li><%= link_to "Account Settings", edit_user_registration_path %></li>
                 <li><%= link_to "Logout", destroy_user_session_path %></li>
               <% else %>
