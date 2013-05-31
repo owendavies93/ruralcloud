@@ -22,7 +22,7 @@ class ChallengesController < ApplicationController
     # This is executed for all shows, but only used in the _show_unentered
     # partial. Perhaps this is a bad way of doing it, I can't decide
 
-    @entries =Entry.where(:challenge_id => @challenge.id).order("user_id asc")
+    @entries = Entry.where(:challenge_id => @challenge.id).order("user_id asc")
 
     @comp   = @entries.pluck(:compilations)
     @f_comp = @entries.pluck(:failed_compilations)
@@ -183,6 +183,8 @@ class ChallengesController < ApplicationController
     # Send message to self, to close down interface
     Pusher['private-' + current_user.id.to_s].trigger('self_submitted', {})
 
+    sync @entry, :update
+
     respond_to do |format|
       format.js {}
     end
@@ -191,6 +193,9 @@ class ChallengesController < ApplicationController
   def send_compile
     @entry = get_entry(params[:challenge])
     @entry.update_attributes(:compilations =>  @entry.compilations + 1, :length => params[:length], :lines => params[:lines], :last_code => params[:input])
+
+    sync @entry, :update
+
     filename = "M" + params[:challenge] + "_" + current_user.id.to_s
     Rabbitq::Client::publish(params[:input], self, 1, filename, params[:challenge])
     throw :async
@@ -199,6 +204,9 @@ class ChallengesController < ApplicationController
   def send_eval
     @entry = get_entry(params[:challenge])
     @entry.update_attributes(:evaluations => @entry.evaluations + 1)
+
+    sync @entry, :update
+
     filename = "M" + params[:challenge] + "_" + current_user.id.to_s
     Rabbitq::Client::publish(params[:input], self, 0, filename, params[:challenge])
     throw :async
@@ -228,6 +236,18 @@ class ChallengesController < ApplicationController
         log("Successful evaluation", challenge)
       end
     end
+  end
+
+  def failed_eval challenge_id
+    @entry = get_entry(challenge_id)
+    @entry.update_attributes(:failed_evaluations => @entry.failed_evaluations + 1)
+    sync @entry, :update
+  end
+
+  def failed_compilation challenge_id
+    @entry = get_entry(challenge_id)
+    @entry.update_attributes(:failed_compilations => @entry.failed_compilations + 1)
+    sync @entry, :update
   end
 
   def log message, challenge
@@ -272,16 +292,4 @@ class ChallengesController < ApplicationController
       return get_entry(challenge).submitted
     end
     helper_method :has_submitted
-
-    def failed_eval challenge_id
-      @entry = get_entry(challenge_id)
-      @entry.update_attributes(:failed_evaluations => @entry.failed_evaluations + 1)
-    end
-    helper_method :failed_eval
-
-    def failed_compilation challenge_id
-      @entry = get_entry(challenge_id)
-      @entry.update_attributes(:failed_compilations => @entry.failed_compilations + 1)
-    end
-    helper_method :failed_compilation
 end

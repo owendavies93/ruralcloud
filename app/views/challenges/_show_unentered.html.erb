@@ -66,27 +66,8 @@
   </div>
   <div class="span4 log">
     <h4>Entrants:</h4>
-    <% if not @challenge.users.blank? %>
-      <% for user in @challenge.users %>
-        <div class="well well-small clearfix" style="width: 90%">
-          <div class="pull-left">
-            <%= image_tag gravatar(user) %><br/>
-            <b><%= sanitize user.email %></b><br/>
-          </div>
-          <div class="pull-right" style="text-align: right">
-            <% entry = Entry.find(:first, :conditions => {user_id: user.id, challenge_id: @challenge.id}) %>
-            <b>Compilations: </b><%= entry.compilations %><br/>
-            <b>Evaluations: </b><%= entry.evaluations %><br/>
-            <b>Code length: </b><%= entry.length %><br/>
-            <b>Lines: </b><%= entry.lines %><br/>
-            <b>Realtime test score: </b>TODO<br/>
-            <b>Failed Compilations: </b><%= entry.failed_compilations %><br/>
-            <b>Failed Evaluations: </b><%= entry.failed_evaluations %><br/>
-          </div>
-        </div>
-      <% end %>
-    <% else %>
-      There are no entrants. Sorry!
+    <% @entries.each do |entry| %>
+      <%= sync partial: 'challenge_entry', resource: entry %>
     <% end %>
   </div>
 <% end %>
