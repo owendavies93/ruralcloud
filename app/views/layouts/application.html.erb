@@ -4,8 +4,54 @@
     <title>Ruralcloud</title>
     <%= stylesheet_link_tag    "application", :media => "all" %>
     <%= javascript_include_tag "application" %>
+    <%= javascript_include_tag "http://js.pusherapp.com/1.9/pusher.min.js" %>
+    <%= javascript_include_tag Sync.adapter_javascript_url %>
     <%= csrf_meta_tags %>
     <link href='//fonts.googleapis.com/css?family=Inconsolata:400,700' rel='stylesheet' type='text/css'>
+
+    <script type="text/javascript">
+      <% if Rails.env.development? %>
+        Pusher.log = function(message) {
+          if (window.console && window.console.log) {
+            window.console.log(message);
+          }
+        };
+      <% end %>
+
+      <% if user_signed_in? %>
+        var pusher = new Pusher('<%= Pusher.key %>');
+        var user_channel = pusher.subscribe('private-<%= current_user.id %>');
+
+        user_channel.bind('new_entrant', function(data) {
+          msg = data.entrant + ' has entered <a href="/challenges/' + data.id + '>a challenge you are in</a>.';
+          dom_notify(msg);
+        });
+
+        user_channel.bind('entrant_submitted', function(data) {
+          msg = data.entrant + ' has submitted their final code for <a href="/challenges/' + data.id + '>a challenge you are in</a>.';
+          dom_notify(msg);
+        });
+
+        <% if current_user.try(:admin?) %>
+          user_channel.bind('admin_entrant', function(data) {
+            msg = data.entrant + 'has entered <a href="/challenges/' + data.id + '>your challenge</a>!';
+            dom_notify(msg);
+          });
+
+          user_channel.bind('admin_submitted', function(data) {
+            msg = data.entrant + 'has submitted their final code for <a href="/challenges/' + data.id + '>a challenge you are in</a>.';
+            dom_notify(msg);
+          });
+        <% end %>
+
+        function dom_notify(msg) {
+          $('.bottom-left').notify({
+            message: { text: msg },
+            fadeOut: { enabled: true, delay: 3000 }
+          }).show();
+        }
+      <% end %>
+    </script>
   </head>
 
   <body>
@@ -20,19 +66,25 @@
                 <% if current_user.try(:admin?) %>
                   <li><%= link_to 'Create Challenge', new_challenge_path %></li>
                 <% end %>
+                <li><%= link_to "Leaderboards", global_leaderboard_path %></li>
               <% end %>
             </ul>
-              <ul class="nav pull-right">
-                <% if user_signed_in? %>
-                  <li class="avatar"><%= image_tag gravatar_small(current_user) %></li>
-                  <li><a href="#">Logged in as <%= sanitize current_user.email %></a></li>
-                  <li><%= link_to "Account Settings", edit_user_registration_path %></li>
-                  <li><%= link_to "Logout", destroy_user_session_path %></li>
-                <% else %>
-                  <li><%= link_to "Login", new_user_session_path %></li>
-                  <li><%= link_to "Register", new_user_registration_path %></li>
-                <% end %>
+            <% if get_next_start_time != "" %>
+              <ul class="nav">
+                <li class="next-challenge center"><a>Next challenge starts in <%= get_next_start_time %></a></li>
               </ul>
+            <% end %>
+            <ul class="nav pull-right">
+              <% if user_signed_in? %>
+                <li class="avatar"><%= image_tag gravatar_small(current_user) %></li>
+                <li><a>Logged in as <%= sanitize current_user.email %></a></li>
+                <li><%= link_to "Account Settings", edit_user_registration_path %></li>
+                <li><%= link_to "Logout", destroy_user_session_path %></li>
+              <% else %>
+                <li><%= link_to "Login", new_user_session_path %></li>
+                <li><%= link_to "Register", new_user_registration_path %></li>
+              <% end %>
+            </ul>
           </div>
         </div>
       </div>
@@ -40,6 +92,8 @@
       <div class="container">
         <%= yield %>
       </div>
+
+      <div class="notifications bottom-left"></div>
 
       <div id="push"></div>
     </div>

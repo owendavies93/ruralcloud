@@ -1,0 +1,44 @@
+<h2>Global Leaderboard</h2>
+
+<table class="table table-striped">
+  <tr>
+    <th>User</th>
+    <th>Compilations</th>
+    <th>Failed</th>
+    <th>Evaluations</th>
+    <th>Failed</th>
+    <th>Code Length</th>
+    <th>Lines</th>
+    <th>Test Suite Score</th>
+  </tr>
+
+<% @overalls.each do |entry| %>
+  <tr>
+    <td><%= sanitize User.find(:first, :conditions => {id: entry.user_id}).email %></td>
+    <td><%= entry.total_comp %></td>
+    <td><%= entry.failed_comp %></td>
+    <td><%= entry.total_eval %></td>
+    <td><%= entry.failed_eval %></td>
+    <td><%= entry.av_length %></td>
+    <td><%= entry.av_lines %></td>
+    <td>TODO</td>
+  </tr>
+
+<% end %>
+
+</table>
+
+View leaderboard for ended challenge:<br/>
+<%= select_tag "challenge_id", options_from_collection_for_select(@ended, 'id', 'id'), :include_blank => "" %>
+
+<script type="text/javascript">
+  $(function(){
+    $('#challenge_id').change(function() {
+       var url = "/leaderboards/" + $(this).val()
+        if (url) {
+          window.location.assign(url);
+        }
+        return false;
+    });
+  });
+</script>

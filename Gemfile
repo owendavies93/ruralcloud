@@ -10,6 +10,7 @@ gem 'pg'
 
 # using deivse for user auth
 gem 'devise', '2.2.4'
+gem 'devise_security_extension'
 
 # Gems used only for assets and not required
 # in production environments by default.
@@ -40,9 +41,9 @@ gem 'omniauth-github'
 # Forces ruby to know location of SSL certificates
 gem 'certified'
 
-# File upload
-gem 'paperclip'
-gem 'aws-sdk'
+# pusher for notifcations
+gem 'pusher'
+gem 'sync'
 
 # To use ActiveModel has_secure_password
 # gem 'bcrypt-ruby', '~> 3.0.0'
