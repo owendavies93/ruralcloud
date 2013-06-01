@@ -28,8 +28,8 @@ class ChallengesController < ApplicationController
     @f_comp = @entries.pluck(:failed_compilations)
     @eval   = @entries.pluck(:evaluations)
     @f_eval = @entries.pluck(:failed_evaluations)
-    @length = @entries.pluck(:length)
-    @lines  = @entries.pluck(:lines)
+    @length = @entries.pluck(:length).map!{ |e| e == nil ? 0 : e }
+    @lines  = @entries.pluck(:lines).map!{ |e| e == nil ? 0 : e }
 
     respond_to do |format|
       format.html # show.html.erb
@@ -253,7 +253,7 @@ class ChallengesController < ApplicationController
   def log message, challenge
     cur_challenge = Challenge.find(challenge)
     now = Time.new
-    cur_challenge.update_attribute("log", now.inspect + ": " + message + " - " + current_user.email + "\n" + cur_challenge.log )
+    cur_challenge.update_attribute("log", now.inspect + ": " + message + " - " + current_user.email + "\n" + cur_challenge.log)
   end
 
   def get_entry challenge_id

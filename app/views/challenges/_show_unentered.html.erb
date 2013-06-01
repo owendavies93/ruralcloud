@@ -104,6 +104,13 @@
             <% end %>
           <% end %>
         ]
+        <% if @entries.length > 3 %>
+          ,
+          labels: {
+            rotation: -45,
+            align: 'right'
+          }
+        <% end %>
       },
       yAxis: {
         title: { text: titles[0] },
