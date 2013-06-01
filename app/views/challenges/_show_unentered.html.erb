@@ -74,14 +74,6 @@
 </div>
 
 <script type="text/javascript">
-  <% now = Time.new %>
-  var endtime = <%= @challenge.endtime.minus_with_coercion(now) %>;
-  $("#start-countdown").countdown({until: endtime});
-
-  setTimeout(function() {
-    location.reload();
-  }, endtime * 1000);
-
   var dataSets = [<%= @comp %>, <%= @f_comp %>, <%= @eval %>, <%= @f_eval %>, <%= @length %>, <%= @lines %>],
       titles = ['Compilations', 'Failed Compilations', 'Evaluations', 'Failed Evaluations', 'Code Length', 'Lines'],
       currentSet = 0,
@@ -172,4 +164,21 @@
       });
     }
   });
+
+  <% if started %>
+    <% now = Time.new %>
+    var endtime = <%= @challenge.endtime.minus_with_coercion(now) %>;
+    $("#start-countdown").countdown({until: endtime});
+
+    var challenge_channel = pusher.subscribe('challenge-<%= @challenge.id %>');
+    challenge_channel.bind('update_graphs', function(d) {
+      dataSets = [d.comp, d.f_comp, d.eval, d.f_eval, d.length, d.lines];
+      chart.series[0].setData(dataSets[currentSet]);
+    });
+
+    setTimeout(function() {
+      location.reload();
+    }, endtime * 1000);
+  <% end %>
+
 </script>

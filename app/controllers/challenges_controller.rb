@@ -236,6 +236,19 @@ class ChallengesController < ApplicationController
         log("Successful evaluation", challenge)
       end
     end
+
+    @entries = Entry.where(:challenge_id => challenge).order("user_id asc")
+
+    comp   = @entries.pluck(:compilations)
+    f_comp = @entries.pluck(:failed_compilations)
+    eval   = @entries.pluck(:evaluations)
+    f_eval = @entries.pluck(:failed_evaluations)
+    length = @entries.pluck(:length).map!{ |e| e == nil ? 0 : e }
+    lines  = @entries.pluck(:lines).map!{ |e| e == nil ? 0 : e }
+
+    Pusher['challenge-' + challenge].trigger('update_graphs',
+      {:comp => comp, :f_comp => f_comp, :eval => eval, :f_eval => f_eval, :length => length, :lines => lines})
+
   end
 
   def failed_eval challenge_id
