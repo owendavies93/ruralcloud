@@ -4,7 +4,7 @@
 <% if started %>
   <p>Administration Panel</p>
 <% end %>
-<div class="row-fluid">
+<div class="row-fluid admin-panel">
 <div class="span4">
 
   <dl class="dl-horizontal">
@@ -96,7 +96,7 @@
       title: { text: '' },
       xAxis: {
         categories: [
-          <% for user in @challenge.users %>
+          <% @challenge.users.order("id asc").each do |user| %>
             <% if user != @challenge.users.last %>
               '<%= sanitize user.email %>',
             <% else %>
