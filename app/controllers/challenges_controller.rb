@@ -247,7 +247,7 @@ class ChallengesController < ApplicationController
     lines  = @entries.pluck(:lines).map!{ |e| e == nil ? 0 : e }
 
     Pusher['challenge-' + challenge].trigger('update_graphs',
-      {:comp => comp, :f_comp => f_comp, :eval => eval, :f_eval => f_eval, :length => length, :lines => lines})
+      {:comp => comp, :f_comp => f_comp, :eval => eval, :f_eval => f_eval, :length => length, :lines => lines, :log => cur_challenge.log})
 
   end
 

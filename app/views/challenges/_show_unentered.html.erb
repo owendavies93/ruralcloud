@@ -61,7 +61,7 @@
 </div>
 
 <% if started %>
-  <div class="span4 well well-small log" style="font-family: 'Inconsolata', monospace">
+  <div class="span4 well well-small log" id="challenge-log" style="font-family: 'Inconsolata', monospace">
     <%= simple_format(@challenge.log) %>
   </div>
   <div class="span4 log">
@@ -174,11 +174,23 @@
     challenge_channel.bind('update_graphs', function(d) {
       dataSets = [d.comp, d.f_comp, d.eval, d.f_eval, d.length, d.lines];
       chart.series[0].setData(dataSets[currentSet]);
+      $('#challenge-log').html(simpleFormat(d.log));
     });
 
     setTimeout(function() {
       location.reload();
     }, endtime * 1000);
+
+    function simpleFormat(str) {
+      str = str.replace(/\r\n?/, "\n");
+      str = $.trim(str);
+      if (str.length > 0) {
+        str = str.replace(/\n\n+/g, '</p><p>');
+        str = str.replace(/\n/g, '<br />');
+        str = '<p>' + str + '</p>';
+      }
+      return str;
+    }
   <% end %>
 
 </script>

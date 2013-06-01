@@ -168,10 +168,13 @@ This rule breaks a lot of pages, don't override bootstrap classes
   text-align: left;
 }
 
+/*
+Same as above
 .span4 p {
   font-size: 18px;
   font-weight: 300;
 }
+*/
 
 .featurette-divider {
   margin: 80px 0; /* Space out the Bootstrap <hr> more */
