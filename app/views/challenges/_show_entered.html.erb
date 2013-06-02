@@ -61,30 +61,6 @@
 
 <script type="text/javascript">
 
-<% if !started %>
-
-  <% now = Time.new %>
-  var starttime = <%= @challenge.starttime.minus_with_coercion(now) %>;
-  $("#start-countdown").countdown({until: starttime});
-
-  setTimeout(function() {
-    location.reload();
-  }, starttime * 1000);
-
-<% elsif !ended %>
-
-  <% now = Time.new %>
-  var endtime = <%= @challenge.endtime.minus_with_coercion(now) %>;
-  $("#start-countdown").countdown({until: endtime});
-
-  setTimeout(function() {
-    location.reload();
-  }, endtime * 1000);
-
-  $("#compile-button").removeAttr("disabled");
-
-<% end %>
-
   var editor = CodeMirror.fromTextArea(document.getElementById('editor'), {
       mode: "haskell",
       lineNumbers: true,
@@ -98,7 +74,8 @@
   var used = new Array();
   var history = new Array();
   var currentline = 0;
-  var prompt = "$> "
+  var cmd = "";
+  var prompt = "$> ";
 
   function getCurLineLen(co) {
     return co.getLine(co.getCursor().line).length
@@ -117,26 +94,10 @@
             co.setOption("readOnly", true);
             co.replaceSelection("\n", "end", "+input");
 
-            var cmd = co.getLine(co.lineCount() - 2).substring(3);
+            cmd = co.getLine(co.lineCount() - 2).substring(3);
             // Send cmd to server, get back result
 
-            $.post("/challenges/send_eval", {input: cmd, challenge:<%= @challenge.id %>}, function(data) {
-              // data.status:
-              //   -1 means server attack
-              //   0 means success
-              //   anything else means Haskell error
-
-              co.setLine(co.lineCount() - 1, data.responseString);
-              co.replaceSelection("\n" + prompt, "end", "+input");
-              // 'Mark' lines as uneditable
-              used.push(co.lineCount() - 2);
-              used.push(co.lineCount() - 3);
-
-              // Add cod to history
-              history.push(cmd);
-              currentline++;
-              co.setOption("readOnly", false);
-            }, "json");
+            $.post("/challenges/send_eval", {input: cmd, challenge:<%= @challenge.id %>});
           }
         },
 
@@ -185,21 +146,65 @@
 
   co.setSize(null, 300);
 
+<% if !started %>
+
+  <% now = Time.new %>
+  var starttime = <%= @challenge.starttime.minus_with_coercion(now) %>;
+  $("#start-countdown").countdown({until: starttime});
+
+  setTimeout(function() {
+    location.reload();
+  }, starttime * 1000);
+
+<% elsif !ended %>
+
+  <% now = Time.new %>
+  var endtime = <%= @challenge.endtime.minus_with_coercion(now) %>;
+  $("#start-countdown").countdown({until: endtime});
+
+  setTimeout(function() {
+    location.reload();
+  }, endtime * 1000);
+
+  $("#compile-button").removeAttr("disabled");
+
+  user_channel.bind('remote-message', function(data) {
+    res = JSON.parse(data.result);
+
+    // res.status:
+    //   -1 means server attack
+    //   0 means success
+    //   anything else means Haskell error
+    if (res.isCompileJob) {
+      var print = !data.status? "Success!" : res.responseString;
+      co.replaceSelection("\n" + print, "end", "+input");
+      co.replaceSelection("\n" + prompt, "end", "+input");
+      $("#compile-button").removeAttr("disabled");
+      $("#compile-button").html("Compile");
+      co.setOption("readOnly", false);
+    } else {
+      co.setLine(co.lineCount() - 1, res.responseString);
+      co.replaceSelection("\n" + prompt, "end", "+input");
+      // 'Mark' lines as uneditable
+      used.push(co.lineCount() - 2);
+      used.push(co.lineCount() - 3);
+
+      // Add cmd to history
+      history.push(cmd);
+      currentline++;
+      co.setOption("readOnly", false);
+    }
+  });
+
+<% end %>
+
   $("#compile-button").click(function(){
     if ($(this).attr("disabled") != "disabled") {
       $(this).attr("disabled", "disabled");
       $(this).html("Compiling...");
       co.setLine(co.lineCount()-1, "Compiling...");
       co.setOption("readOnly", true);
-      $.post("/challenges/send_compile", {input: editor.getValue(), challenge: <%= @challenge.id %>, lines: editor.lineCount(), length: editor.getValue().length},
-        function(data) {
-          var print = !data.status? "Success!" : data.responseString;
-          co.replaceSelection("\n" + print, "end", "+input");
-          co.replaceSelection("\n" + prompt, "end", "+input");
-          $("#compile-button").removeAttr("disabled");
-          $("#compile-button").html("Compile");
-          co.setOption("readOnly", false);
-        }, "json");
+      $.post("/challenges/send_compile", {input: editor.getValue(), challenge: <%= @challenge.id %>, lines: editor.lineCount(), length: editor.getValue().length});
     }
   });
 

@@ -6,9 +6,9 @@
     <tr>
       <th>User</th>
       <th>Compilations</th>
-      <th>Failed %</th>
+      <th>Failed Compilations</th>
       <th>Evaluations</th>
-      <th>Failed %</th>
+      <th>Failed Evaluations</th>
       <th>Code Length</th>
       <th>Lines</th>
       <th>Test Suite Score</th>
@@ -18,21 +18,9 @@
     <tr>
       <td><%= sanitize User.find(:first, :conditions => {id: entry.user_id}).email %></td>
       <td><%= entry.compilations %></td>
-      <td>
-        <% if entry.compilations > 0 %>
-          <%= entry.failed_compilations / entry.compilations / 1 * 100 %>
-        <% else %>
-          0
-        <% end %>
-      </td>
+      <td><%= entry.failed_compilations %></td>
       <td><%= entry.evaluations %></td>
-      <td>
-        <% if entry.evaluations > 0 %>
-          <%= entry.failed_evaluations / entry.evaluations / 1 * 100 %>
-        <% else %>
-          0
-        <% end %>
-      </td>
+      <td><%= entry.failed_evaluations %></td>
       <td><%= entry.length %></td>
       <td><%= entry.lines %></td>
       <td>TODO</td>

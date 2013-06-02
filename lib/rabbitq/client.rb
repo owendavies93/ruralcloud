@@ -22,8 +22,10 @@ module Rabbitq
           message = "module " + file + " where\n" + message
         end
 
+        user_id = file.partition('_').last
         file = file + ".hs"
         puts message
+        puts user_id
 
         serialisedMessage = RuralMessage.new
         serialisedMessage.compile = compile
@@ -47,10 +49,14 @@ module Rabbitq
               :correlation_id => corr_id
               )
 
-              timer = EventMachine::PeriodicTimer.new(0.1) do
+            puts "hello"
+
+            timer = EventMachine::PeriodicTimer.new(0.1) do
               if result = AdmitEventMachine::requests_list[corr_id]
-                puts "waiting for " + corr_id
+                puts "waited for " + corr_id
+
                 block.call(result, challenge)
+                Pusher['private-' + user_id].trigger('remote-message', {:result => result})
                 timer.cancel
               end
             end

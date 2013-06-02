@@ -120,7 +120,7 @@ html, body {
 .my-carousel .carousel-caption {
   background-color: transparent;
   position: static;
-  max-width: 550px;
+  max-width: 500px;
   padding: 0 20px;
   margin-top: 200px;
   margin-left: 50px;
@@ -147,12 +147,9 @@ html, body {
   margin-right: 10px;
 }
 
-/*
-This rule breaks a lot of pages, don't override bootstrap classes
-.span4 {
+.index-block {
   line-height: 1;
 }
-*/
 
 .row img {
   max-height: 120px;
@@ -168,13 +165,10 @@ This rule breaks a lot of pages, don't override bootstrap classes
   text-align: left;
 }
 
-/*
-Same as above
-.span4 p {
+.index-block p {
   font-size: 18px;
   font-weight: 300;
 }
-*/
 
 .featurette-divider {
   margin: 80px 0; /* Space out the Bootstrap <hr> more */
