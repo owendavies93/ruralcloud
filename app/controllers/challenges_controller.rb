@@ -215,7 +215,6 @@ class ChallengesController < ApplicationController
 
   def call(result, challenge)
     cur_challenge = Challenge.find(challenge)
-    request.env['async.callback'].call [200, {'Content-Type' => 'text/plain'}, result]
     res = JSON.parse(result)
 
     if res["status"].to_i == -1
