@@ -213,7 +213,6 @@ class ChallengesController < ApplicationController
   end
 
   def call(result, challenge)
-    cur_challenge = Challenge.find(challenge)
     res = JSON.parse(result)
 
     if res["status"].to_i == -1
@@ -222,19 +221,24 @@ class ChallengesController < ApplicationController
 
     if res["isCompileJob"]
       if res["status"].to_i > 0
-        failed_compilation(cur_challenge.id)
+        failed_compilation(challenge)
         log("Failed compilation", challenge)
       else
         log("Successful compilation", challenge)
       end
     else
       if res["status"].to_i > 0
-        failed_eval(cur_challenge.id)
+        failed_eval(challenge)
         log("Failed evaluation", challenge)
       else
         log("Successful evaluation", challenge)
       end
     end
+
+    cur_challenge = Challenge.find(challenge)
+
+    puts "in call:"
+    puts cur_challenge.log
 
     @entries = Entry.where(:challenge_id => challenge).order("user_id asc")
 
@@ -266,6 +270,9 @@ class ChallengesController < ApplicationController
     cur_challenge = Challenge.find(challenge)
     now = Time.new
     cur_challenge.update_attribute("log", now.inspect + ": " + message + " - " + current_user.email + "\n" + cur_challenge.log)
+
+    puts "in log:"
+    puts cur_challenge.log
   end
 
   def get_entry challenge_id

@@ -2,23 +2,52 @@ require 'amqp'
 require 'beefcake'
 
 module Rabbitq
+  class RuralTest
+    include Beefcake::Message
+
+    required :input, :string, 1
+    repeated :output, :string, 2
+  end
+
   class RuralMessage
     include Beefcake::Message
-    required :compile, :int32, 1
+
+    module JobType
+      Eval = 1
+      Compile = 2
+      Test = 3
+    end
+
+    required :type, JobType, 1
     required :code, :string, 2
     required :filename, :string, 3
+    optional :tests, RuralTest, 4
+  end
+
+  class RuralTestOutcome
+    include Beefcake::Message
+
+    required :passed, :boolean, 1
+    required :actual, :string, 2
+    required :expected, :string, 3
+  end
+
+  class RuralTestResponse
+    include Beefcake::Message
+
+    repeated :tests, RuralTestOutcome, 1
   end
 
   class Client
     attr_accessor :thread
 
-    def self.publish(message, block, compile, file, challenge)
-      new.publish(message, block, compile, file, challenge)
+    def self.publish(message, block, type, file, challenge)
+      new.publish(message, block, type, file, challenge)
     end
 
-    def publish(message, block, compile, file, challenge)
+    def publish(message, block, type, file, challenge)
       begin
-        if compile == 1
+        if type == 1
           message = "module " + file + " where\n" + message
         end
 
@@ -28,7 +57,7 @@ module Rabbitq
         puts user_id
 
         serialisedMessage = RuralMessage.new
-        serialisedMessage.compile = compile
+        serialisedMessage.type = type
         serialisedMessage.code = message
         serialisedMessage.filename = file
 
