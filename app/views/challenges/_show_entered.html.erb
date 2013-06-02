@@ -21,6 +21,7 @@
         <% if started && !ended %>
           <%= link_to 'Submit', submit_challenge_path, method: :post, remote: true, :class => "btn btn-danger pull-left", :id => "submit-button", data: { confirm: 'Are you sure you want to submit? You will not be able to edit your code once you have!'} %>
         <% end %>
+        <a id="github-button" class="btn btn-inverse pull-right" >Github</a>
     </div>
     <div class="span6">
       <div class="row-fluid codewrapper">
@@ -202,6 +203,15 @@
         }, "json");
     }
   });
+
+  $("#github-button").click(function(){
+      $.post("/challenges/push_github", 
+        {input: editor.getValue(), challenge: <%= @challenge.id %>},
+        function(data) {
+          console.log(data);
+        }
+        ,"json")}
+      );
 
   $("#popout").click(function() {
     if ($(this).text() == "Pop out") {

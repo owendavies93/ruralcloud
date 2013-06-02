@@ -1,4 +1,5 @@
 require 'rabbitq/client'
+require "octokit"
 
 class ChallengesController < ApplicationController
   # GET /challenges
@@ -60,29 +61,29 @@ class ChallengesController < ApplicationController
 
     cur_test_line = 0
     added_to_errors = false
-    if params[:test_suite_file] != nil
-      File.open(params[:test_suite_file].path) do |f|
-        f.each_with_index do |line, index|
-          if index == 0
-            if line[0] != '>'
-              @challenge.errors.add(:test_suite, "Test suite must start with test")
-              added_to_errors = true;
-            end
-          else
-            if line[0] == '>' && (index == cur_test_line + 1 || f.eof?)
-              @challenge.errors.add(:test_suite, "All tests must have at least one possible output")
-              added_to_errors = true;
-            elsif line[0] == '>'
-              cur_test_line = index
-            end
-          end
-        end
-      end
-      @challenge.update_attribute("test_suite", params[:test_suite_file].read)
-    else
-      @challenge.errors.add(:test_suite, "Must submit test suite file")
-      added_to_errors = true;
-    end
+    # if params[:test_suite_file] != nil
+    #   File.open(params[:test_suite_file].path) do |f|
+    #     f.each_with_index do |line, index|
+    #       if index == 0
+    #         if line[0] != '>'
+    #           @challenge.errors.add(:test_suite, "Test suite must start with test")
+    #           added_to_errors = true;
+    #         end
+    #       else
+    #         if line[0] == '>' && (index == cur_test_line + 1 || f.eof?)
+    #           @challenge.errors.add(:test_suite, "All tests must have at least one possible output")
+    #           added_to_errors = true;
+    #         elsif line[0] == '>'
+    #           cur_test_line = index
+    #         end
+    #       end
+    #     end
+    #   end
+    #   @challenge.update_attribute("test_suite", params[:test_suite_file].read)
+    # else
+    #   @challenge.errors.add(:test_suite, "Must submit test suite file")
+    #   added_to_errors = true;
+    # end
 
     respond_to do |format|
       if !added_to_errors
@@ -240,6 +241,17 @@ class ChallengesController < ApplicationController
     return Entry.find(:first, :conditions => {:user_id => current_user.id, :challenge_id => challenge_id})
   end
   helper_method :get_entry
+
+  def push_github
+    cur_challenge = Challenge.find(params[:challenge])
+    client = Octokit::Client.new(:login => "current_user.email", :oauth_token => current_user.github_id)
+    repo = client.create_repository(cur_challenge.description, {:description => "RuralCloud", :auto_init => true, :gitignore_template => "Haskell"})
+    content = Base64.encode64('Hello').delete("\r\n")
+    puts repo.url[29, repo.url.length]
+    commit = client.add_content(repo.url[29, repo.url.length], "#{cur_challenge.description}.hs", "Init commit from RuralCloud", :input, :branch => "master")
+    render :nothing => true
+  end
+  helper_method :push_github
 
   private
     def is_entered challenge
