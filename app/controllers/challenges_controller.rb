@@ -276,12 +276,21 @@ class ChallengesController < ApplicationController
   helper_method :get_entry
 
   def push_github
+    entry = get_entry(params[:challenge])
     cur_challenge = Challenge.find(params[:challenge])
     client = Octokit::Client.new(:login => "current_user.email", :oauth_token => current_user.github_id)
-    repo = client.create_repository(cur_challenge.description, {:description => "RuralCloud", :auto_init => true, :gitignore_template => "Haskell"})
-    content = Base64.encode64('Hello').delete("\r\n")
-    puts repo.url[29, repo.url.length]
-    commit = client.add_content(repo.url[29, repo.url.length], "#{cur_challenge.description}.hs", "Init commit from RuralCloud", :input, :branch => "master")
+    message = params[:message] || "Commit from RuralCloud"
+    if(params[:input])
+      commit = nil
+      unless(entry.github_repo)
+        repo = client.create_repository(cur_challenge.description, {:description => "RuralCloud", :auto_init => true, :gitignore_template => "Haskell"})
+        entry.update_attribute("github_repo", repo.url[29, repo.url.length])
+        commit = client.add_content(entry.github_repo, "#{cur_challenge.description}.hs", message, params[:input], :branch => "master")
+      else
+        commit = client.update_content(entry.github_repo, "#{cur_challenge.description}.hs", message, entry.file_hash, params[:input], :branch => "master")
+      end
+      entry.update_attribute('file_hash', commit[:content].sha)
+    end
     render :nothing => true
   end
   helper_method :push_github

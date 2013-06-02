@@ -295,6 +295,10 @@ Same as above
 
 @import 'bootstrap-responsive';
 
-.github-button {
-  padding-top: 30px;
+.commit {
+  padding: 20px 0;
+}
+
+.commit .box {
+  width: 65%;
 }
