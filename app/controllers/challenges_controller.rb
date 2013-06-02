@@ -276,22 +276,27 @@ class ChallengesController < ApplicationController
   helper_method :get_entry
 
   def push_github
-    entry = get_entry(params[:challenge])
-    cur_challenge = Challenge.find(params[:challenge])
-    client = Octokit::Client.new(:login => "current_user.email", :oauth_token => current_user.github_id)
-    message = params[:message] || "Commit from RuralCloud"
-    if(params[:input])
-      commit = nil
-      unless(entry.github_repo)
-        repo = client.create_repository(cur_challenge.description, {:description => "RuralCloud", :auto_init => true, :gitignore_template => "Haskell"})
-        entry.update_attribute("github_repo", repo.url[29, repo.url.length])
-        commit = client.add_content(entry.github_repo, "#{cur_challenge.description}.hs", message, params[:input], :branch => "master")
-      else
-        commit = client.update_content(entry.github_repo, "#{cur_challenge.description}.hs", message, entry.file_hash, params[:input], :branch => "master")
+    begin
+      entry = get_entry(params[:challenge])
+      cur_challenge = Challenge.find(params[:challenge])
+      client = Octokit::Client.new(:login => "current_user.email", :oauth_token => current_user.github_id)
+      message = params[:message] || "Commit from RuralCloud"
+      if(params[:input])
+        commit = nil
+        unless(entry.github_repo)
+          repo = client.create_repository(cur_challenge.description, {:description => "RuralCloud", :auto_init => true, :gitignore_template => "Haskell"})
+          entry.update_attribute("github_repo", repo.url[29, repo.url.length])
+          commit = client.add_content(entry.github_repo, "#{cur_challenge.description}.hs", message, params[:input], :branch => "master")
+        else
+          commit = client.update_content(entry.github_repo, "#{cur_challenge.description}.hs", message, entry.file_hash, params[:input], :branch => "master")
+        end
+        entry.update_attribute('file_hash', commit[:content].sha)
       end
-      entry.update_attribute('file_hash', commit[:content].sha)
+      render :nothing => true
+    rescue
+      fail = {:message => "Commit failed. Try again or see if you have a repo already called #{cur_challenge.description}."}
+      render :json => fail
     end
-    render :nothing => true
   end
   helper_method :push_github
 

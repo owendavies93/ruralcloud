@@ -26,6 +26,7 @@
           <div class='commit'>
             <input id="commit" type="text" class='box pull-left' placeholder="Commit from RuralCloud"/>
             <a id="github-button" class="btn pull-right" ><i class='icon-github'></i> Commit to GitHub</a>
+            <div id="commit-response" class='warning'></div>
           </div>
         <% end %>
       <% end %>
@@ -213,7 +214,12 @@
 
   $("#github-button").click(function(){
       $.post("/challenges/push_github", 
-        {input: editor.getValue(), challenge: <%= @challenge.id %>, message: $('#commit').val()}
+        {input: editor.getValue(), challenge: <%= @challenge.id %>, message: $('#commit').val()},function(data) {
+          if(data) {
+            $("#commit-response").text(data.message);
+            console.log(data);
+          }
+        }
         ,"json")}
       );
 
