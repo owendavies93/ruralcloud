@@ -13,15 +13,15 @@ module Rabbitq
     include Beefcake::Message
 
     module JobType
-      Eval = 1
-      Compile = 2
-      Test = 3
+      Eval = 0
+      Compile = 1
+      Test = 2
     end
 
     required :type, JobType, 1
     required :code, :string, 2
     required :filename, :string, 3
-    optional :tests, RuralTest, 4
+    repeated :tests, RuralTest, 4
   end
 
   class RuralTestOutcome
@@ -47,10 +47,6 @@ module Rabbitq
 
     def publish(message, block, type, file, challenge)
       begin
-        if type == 1
-          message = "module " + file + " where\n" + message
-        end
-
         user_id = file.partition('_').last
         file = file + ".hs"
         puts message

@@ -1,4 +1,4 @@
-<%= form_for @challenge, :html => { :multipart => true } do |f| %>
+<%= nested_form_for @challenge do |f| %>
   <% if @challenge.errors.any? %>
     <div id="error_explanation">
       <h3><%= pluralize(@challenge.errors.count, "error") %> prohibited this challenge from being saved:</h3>
@@ -30,13 +30,12 @@
     </div>
   </div>
   <br/>
-  <div class="field">
-    Test suite file:<br/>
-    <div class="fileupload fileupload-new" data-provides="fileupload">
-      <div class="input-append">
-        <div class="uneditable-input span3"><i class="icon-file fileupload-exists"></i> <span class="fileupload-preview"></span></div><span class="btn btn-file"><span class="fileupload-new">Select file</span><span class="fileupload-exists">Change</span><input name="test_suite_file" type="file" /></span><a href="#" class="btn fileupload-exists" data-dismiss="fileupload">Remove</a>
-      </div>
-    </div>
+  <h4>Tests:</h4>
+  <div class="field well well-small tests-field">
+    <%= f.fields_for :tests %>
+    <%= f.link_to_add(:tests, :class => "btn") do %>
+      <i class="icon-plus"></i>
+    <% end %>
   </div>
 
   <div class="field">

@@ -176,7 +176,7 @@
     //   0 means success
     //   anything else means Haskell error
     if (res.isCompileJob) {
-      var print = !data.status? "Success!" : res.responseString;
+      var print = !res.status ? "Success!" : res.responseString;
       co.replaceSelection("\n" + print, "end", "+input");
       co.replaceSelection("\n" + prompt, "end", "+input");
       $("#compile-button").removeAttr("disabled");
