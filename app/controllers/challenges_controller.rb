@@ -61,29 +61,29 @@ class ChallengesController < ApplicationController
 
     cur_test_line = 0
     added_to_errors = false
-    # if params[:test_suite_file] != nil
-    #   File.open(params[:test_suite_file].path) do |f|
-    #     f.each_with_index do |line, index|
-    #       if index == 0
-    #         if line[0] != '>'
-    #           @challenge.errors.add(:test_suite, "Test suite must start with test")
-    #           added_to_errors = true;
-    #         end
-    #       else
-    #         if line[0] == '>' && (index == cur_test_line + 1 || f.eof?)
-    #           @challenge.errors.add(:test_suite, "All tests must have at least one possible output")
-    #           added_to_errors = true;
-    #         elsif line[0] == '>'
-    #           cur_test_line = index
-    #         end
-    #       end
-    #     end
-    #   end
-    #   @challenge.update_attribute("test_suite", params[:test_suite_file].read)
-    # else
-    #   @challenge.errors.add(:test_suite, "Must submit test suite file")
-    #   added_to_errors = true;
-    # end
+    if params[:test_suite_file] != nil
+      File.open(params[:test_suite_file].path) do |f|
+        f.each_with_index do |line, index|
+          if index == 0
+            if line[0] != '>'
+              @challenge.errors.add(:test_suite, "Test suite must start with test")
+              added_to_errors = true;
+            end
+          else
+            if line[0] == '>' && (index == cur_test_line + 1 || f.eof?)
+              @challenge.errors.add(:test_suite, "All tests must have at least one possible output")
+              added_to_errors = true;
+            elsif line[0] == '>'
+              cur_test_line = index
+            end
+          end
+        end
+      end
+      @challenge.update_attribute("test_suite", params[:test_suite_file].read)
+    else
+      @challenge.errors.add(:test_suite, "Must submit test suite file")
+      added_to_errors = true;
+    end
 
     respond_to do |format|
       if !added_to_errors

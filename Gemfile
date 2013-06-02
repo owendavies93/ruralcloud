@@ -44,6 +44,7 @@ gem 'certified'
 # pusher for notifcations
 gem 'pusher'
 gem 'sync'
+gem 'octokit', :git => 'git://github.com/octokit/octokit.rb.git'
 
 # To use ActiveModel has_secure_password
 # gem 'bcrypt-ruby', '~> 3.0.0'
