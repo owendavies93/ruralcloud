@@ -147,9 +147,12 @@ html, body {
   margin-right: 10px;
 }
 
+/*
+This rule breaks a lot of pages, don't override bootstrap classes
 .span4 {
   line-height: 1;
 }
+*/
 
 .row img {
   max-height: 120px;
@@ -165,10 +168,13 @@ html, body {
   text-align: left;
 }
 
+/*
+Same as above
 .span4 p {
   font-size: 18px;
-  font-weight: 300; 
+  font-weight: 300;
 }
+*/
 
 .featurette-divider {
   margin: 80px 0; /* Space out the Bootstrap <hr> more */

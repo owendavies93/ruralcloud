@@ -4,7 +4,7 @@
 <% if started %>
   <p>Administration Panel</p>
 <% end %>
-<div class="row-fluid">
+<div class="row-fluid admin-panel">
 <div class="span4">
 
   <dl class="dl-horizontal">
@@ -61,46 +61,19 @@
 </div>
 
 <% if started %>
-  <div class="span4 well well-small log" style="font-family: 'Inconsolata', monospace">
+  <div class="span4 well well-small log" id="challenge-log" style="font-family: 'Inconsolata', monospace">
     <%= simple_format(@challenge.log) %>
   </div>
   <div class="span4 log">
     <h4>Entrants:</h4>
-    <% if not @challenge.users.blank? %>
-      <% for user in @challenge.users %>
-        <div class="well well-small clearfix" style="width: 90%">
-          <div class="pull-left">
-            <%= image_tag gravatar(user) %><br/>
-            <b><%= sanitize user.email %></b><br/>
-          </div>
-          <div class="pull-right" style="text-align: right">
-            <% entry = Entry.find(:first, :conditions => {user_id: user.id, challenge_id: @challenge.id}) %>
-            <b>Compilations: </b><%= entry.compilations %><br/>
-            <b>Evaluations: </b><%= entry.evaluations %><br/>
-            <b>Code length: </b><%= entry.length %><br/>
-            <b>Lines: </b><%= entry.lines %><br/>
-            <b>Realtime test score: </b>TODO<br/>
-            <b>Failed Compilations: </b><%= entry.failed_compilations %><br/>
-            <b>Failed Evaluations: </b><%= entry.failed_evaluations %><br/>
-          </div>
-        </div>
-      <% end %>
-    <% else %>
-      There are no entrants. Sorry!
+    <% @entries.each do |entry| %>
+      <%= sync partial: 'challenge_entry', resource: entry %>
     <% end %>
   </div>
 <% end %>
 </div>
 
 <script type="text/javascript">
-  <% now = Time.new %>
-  var endtime = <%= @challenge.endtime.minus_with_coercion(now) %>;
-  $("#start-countdown").countdown({until: endtime});
-
-  setTimeout(function() {
-    location.reload();
-  }, endtime * 1000);
-
   var dataSets = [<%= @comp %>, <%= @f_comp %>, <%= @eval %>, <%= @f_eval %>, <%= @length %>, <%= @lines %>],
       titles = ['Compilations', 'Failed Compilations', 'Evaluations', 'Failed Evaluations', 'Code Length', 'Lines'],
       currentSet = 0,
@@ -115,7 +88,7 @@
       title: { text: '' },
       xAxis: {
         categories: [
-          <% for user in @challenge.users %>
+          <% @challenge.users.order("id asc").each do |user| %>
             <% if user != @challenge.users.last %>
               '<%= sanitize user.email %>',
             <% else %>
@@ -123,6 +96,13 @@
             <% end %>
           <% end %>
         ]
+        <% if @entries.length > 3 %>
+          ,
+          labels: {
+            rotation: -45,
+            align: 'right'
+          }
+        <% end %>
       },
       yAxis: {
         title: { text: titles[0] },
@@ -184,4 +164,33 @@
       });
     }
   });
+
+  <% if started %>
+    <% now = Time.new %>
+    var endtime = <%= @challenge.endtime.minus_with_coercion(now) %>;
+    $("#start-countdown").countdown({until: endtime});
+
+    var challenge_channel = pusher.subscribe('challenge-<%= @challenge.id %>');
+    challenge_channel.bind('update_graphs', function(d) {
+      dataSets = [d.comp, d.f_comp, d.eval, d.f_eval, d.length, d.lines];
+      chart.series[0].setData(dataSets[currentSet]);
+      $('#challenge-log').html(simpleFormat(d.log));
+    });
+
+    setTimeout(function() {
+      location.reload();
+    }, endtime * 1000);
+
+    function simpleFormat(str) {
+      str = str.replace(/\r\n?/, "\n");
+      str = $.trim(str);
+      if (str.length > 0) {
+        str = str.replace(/\n\n+/g, '</p><p>');
+        str = str.replace(/\n/g, '<br />');
+        str = '<p>' + str + '</p>';
+      }
+      return str;
+    }
+  <% end %>
+
 </script>
