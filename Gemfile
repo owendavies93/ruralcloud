@@ -44,6 +44,7 @@ gem 'certified'
 # pusher for notifcations
 gem 'pusher'
 gem 'sync'
+gem 'octokit', :git => 'git://github.com/octokit/octokit.rb.git'
 
 gem 'nested_form'
 

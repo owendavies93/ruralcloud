@@ -16,11 +16,20 @@
 <div class="container-fluid">
   <div class="row-fluid">
     <div class="span6">
-        <textarea rows="30" id="editor" placeholder=""></textarea>
-        <a id="compile-button" class="btn btn-primary pull-right" disabled="disabled" >Compile</a>
+      <div class="row-fluid">
         <% if started && !ended %>
+          <textarea rows="30" id="editor" placeholder=""></textarea>
+          <a id="compile-button" class="btn btn-primary pull-right" disabled="disabled" >Compile</a>
           <%= link_to 'Submit', submit_challenge_path, method: :post, remote: true, :class => "btn btn-danger pull-left", :id => "submit-button", data: { confirm: 'Are you sure you want to submit? You will not be able to edit your code once you have!'} %>
+        </div>
+        <% if current_user.github_id%>
+          <div class='commit'>
+            <input id="commit" type="text" class='box pull-left' placeholder="Commit from RuralCloud"/>
+            <a id="github-button" class="btn pull-right" ><i class='icon-github'></i> Commit to GitHub</a>
+            <div id="commit-response" class='warning'></div>
+          </div>
         <% end %>
+      <% end %>
     </div>
     <div class="span6">
       <div class="row-fluid codewrapper">
@@ -207,6 +216,17 @@
       $.post("/challenges/send_compile", {input: editor.getValue(), challenge: <%= @challenge.id %>, lines: editor.lineCount(), length: editor.getValue().length});
     }
   });
+
+  $("#github-button").click(function(){
+      $.post("/challenges/push_github", 
+        {input: editor.getValue(), challenge: <%= @challenge.id %>, message: $('#commit').val()},function(data) {
+          if(data) {
+            $("#commit-response").text(data.message);
+            console.log(data);
+          }
+        }
+        ,"json")}
+      );
 
   $("#popout").click(function() {
     if ($(this).text() == "Pop out") {

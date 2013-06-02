@@ -292,3 +292,17 @@ html, body {
 .control-group.success .fileupload .thumbnail { border-color:#468847; }
 
 @import 'bootstrap-responsive';
+
+.commit {
+  padding: 20px 0;
+}
+
+.commit .box {
+  width: 65%;
+}
+
+.commit .warning {
+  padding: 40px 0;
+  color: red;
+  font-weight: bold;
+}
