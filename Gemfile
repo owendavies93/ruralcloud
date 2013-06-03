@@ -31,7 +31,8 @@ gem 'redcarpet'
 
 gem 'eventmachine'
 gem 'amqp'
-gem 'beefcake'
+# gem 'beefcake', :git => 'git://github.com/bmizerany/beefcake.git'
+gem 'ruby_protobuf'
 
 gem 'thin'
 

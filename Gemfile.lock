@@ -52,7 +52,6 @@ GEM
     arel (3.0.2)
     bcrypt-ruby (3.0.1)
     bcrypt-ruby (3.0.1-x86-mingw32)
-    beefcake (0.3.7)
     bootstrap-sass (2.3.1.0)
       sass (~> 3.2)
     builder (3.0.4)
@@ -159,6 +158,7 @@ GEM
     rdoc (3.12.2)
       json (~> 1.4)
     redcarpet (2.2.2)
+    ruby_protobuf (0.4.11)
     sass (3.2.9)
     sass-rails (3.2.6)
       railties (~> 3.2.0)
@@ -193,7 +193,6 @@ PLATFORMS
 
 DEPENDENCIES
   amqp
-  beefcake
   bootstrap-sass
   certified
   coffee-rails (~> 3.2.1)
@@ -209,6 +208,7 @@ DEPENDENCIES
   pusher
   rails (= 3.2.13)
   redcarpet
+  ruby_protobuf
   sass-rails
   sync
   therubyracer

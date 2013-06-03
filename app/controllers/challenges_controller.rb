@@ -1,5 +1,6 @@
 require 'rabbitq/client'
-require "octokit"
+require 'octokit'
+require 'rabbitq/rural.pb'
 
 class ChallengesController < ApplicationController
   # GET /challenges
@@ -213,6 +214,12 @@ class ChallengesController < ApplicationController
     throw :async
   end
 
+  def run_tests
+    filename = "M" + params[:challenge] + "_" + current_user.id.to_s
+    Rabbitq::Client::publish(params[:input], self, 2, filename, params[:challenge])
+    throw :async
+  end
+
   def call(result, challenge)
     res = JSON.parse(result)
 
@@ -249,7 +256,14 @@ class ChallengesController < ApplicationController
 
     Pusher['challenge-' + challenge].trigger('update_graphs',
       {:comp => comp, :f_comp => f_comp, :eval => eval, :f_eval => f_eval, :length => length, :lines => lines, :log => cur_challenge.log})
+  end
 
+  def test_result result
+    response = RuralTestResponse.new
+    response.parse_from_string result
+    response.outcome.each do |output|
+      puts output.inspect
+    end
   end
 
   def failed_eval challenge_id
