@@ -56,16 +56,16 @@ module Rabbitq
         serialisedMessage.code = message
         serialisedMessage.filename = file
 
-        if type == 2
-          # create some data structures containing tests
-          tests = ChallengeTest.where(:challenge_id => challenge);
-          tests.each do |test|
-            rtest = RuralTest.new
-            rtest.input = test.input
-            rtest.outputs = Output.where(:challenge_test_id => test.id).pluck(:test_output)
-            serialisedMessage.tests.append rtest
-          end
-        end
+        # if type == 2
+        #   # create some data structures containing tests
+        #   tests = ChallengeTest.where(:challenge_id => challenge);
+        #   tests.each do |test|
+        #     rtest = RuralTest.new
+        #     rtest.input = test.input
+        #     rtest.outputs = Output.where(:challenge_test_id => test.id).pluck(:test_output)
+        #     serialisedMessage.tests.append rtest
+        #   end
+        # end
 
         m = ""
         serialisedMessage.encode(m)
