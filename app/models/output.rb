@@ -1,5 +1,5 @@
 class Output < ActiveRecord::Base
-  attr_accessible :test_id, :test_output
+  attr_accessible :challenge_test_id, :test_output
 
-  belongs_to :test
+  belongs_to :challenge_test
 end

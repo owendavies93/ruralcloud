@@ -6,7 +6,7 @@ module Rabbitq
     include Beefcake::Message
 
     required :input, :string, 1
-    repeated :output, :string, 2
+    repeated :outputs, :string, 2
   end
 
   class RuralMessage
@@ -50,12 +50,22 @@ module Rabbitq
         user_id = file.partition('_').last
         file = file + ".hs"
         puts message
-        puts user_id
 
         serialisedMessage = RuralMessage.new
         serialisedMessage.type = type
         serialisedMessage.code = message
         serialisedMessage.filename = file
+
+        if type == 2
+          # create some data structures containing tests
+          tests = ChallengeTest.where(:challenge_id => challenge);
+          tests.each do |test|
+            rtest = RuralTest.new
+            rtest.input = test.input
+            rtest.outputs = Output.where(:challenge_test_id => test.id).pluck(:test_output)
+            serialisedMessage.tests.append rtest
+          end
+        end
 
         m = ""
         serialisedMessage.encode(m)
@@ -74,8 +84,6 @@ module Rabbitq
               :correlation_id => corr_id
               )
 
-            puts "hello"
-
             timer = EventMachine::PeriodicTimer.new(0.1) do
               if result = AdmitEventMachine::requests_list[corr_id]
                 puts "waited for " + corr_id
@@ -87,7 +95,7 @@ module Rabbitq
             end
           }
         else
-         puts "Ohno"
+         puts "Event machine is not running, this is a HUGE issue"
          return false
         end
       rescue Exception => exc

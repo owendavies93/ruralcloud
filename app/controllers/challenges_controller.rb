@@ -44,7 +44,7 @@ class ChallengesController < ApplicationController
     @challenge = Challenge.new
 
     3.times do
-      test = @challenge.tests.build
+      test = @challenge.challenge_tests.build
       test.outputs.build
     end
 
