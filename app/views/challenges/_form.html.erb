@@ -78,9 +78,24 @@ $(document).ready(function() {
 });
 
 $(document).ready(function() {
-  setDateBox('#start_date_creator', "tomorrow at 1pm");
-  setDateBox('#end_date_creator', "tomorrow at 2pm");
+  if($('#challenge_starttime').val().length == 0) {
+    setDateBox('#start_date_creator', "tomorrow at 1pm");
+    setDateBox('#end_date_creator', "tomorrow at 2pm");
+  } else {
+    var start_formatted = makeDate('#challenge_starttime');
+    var end_formatted = makeDate('#challenge_endtime');
+    setDateBox('#start_date_creator', start_formatted);
+    setDateBox('#end_date_creator', end_formatted);
+    $("#start_date_creator .input").val(start_formatted);
+    $("#end_date_creator .input").val(end_formatted);
+  };
 });
+
+function makeDate(id) {
+  var date = Date.utc.create($(id).val());
+  var date_format = '{Weekday} {Month} {ord} {HH}:{mm}:{ss}';
+  return date.format(date_format);
+}
 
 function setDateBox(id, default_time) {
   var el = $(id);
