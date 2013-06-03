@@ -1,5 +1,6 @@
 require 'rabbitq/client'
 require "octokit"
+require 'uri-handler'
 
 class ChallengesController < ApplicationController
   # GET /challenges
@@ -283,12 +284,14 @@ class ChallengesController < ApplicationController
       message = params[:message] || "Commit from RuralCloud"
       if(params[:input])
         commit = nil
+        filename = "#{cur_challenge.description}.hs".to_uri
+        file = params[:input]<<"\n"
         unless(entry.github_repo)
           repo = client.create_repository(cur_challenge.description, {:description => "RuralCloud", :auto_init => true, :gitignore_template => "Haskell"})
           entry.update_attribute("github_repo", repo.url[29, repo.url.length])
-          commit = client.add_content(entry.github_repo, "#{cur_challenge.description}.hs", message, params[:input], :branch => "master")
+          commit = client.add_content(entry.github_repo, filename, message, file, :branch => "master")
         else
-          commit = client.update_content(entry.github_repo, "#{cur_challenge.description}.hs", message, entry.file_hash, params[:input], :branch => "master")
+          commit = client.update_content(entry.github_repo, filename, message, entry.file_hash, file, :branch => "master")
         end
         entry.update_attribute('file_hash', commit[:content].sha)
       end
