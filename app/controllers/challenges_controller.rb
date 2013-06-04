@@ -66,7 +66,6 @@ class ChallengesController < ApplicationController
   def create
     @challenge = Challenge.new(params[:challenge])
 
-    @challenge.update_attribute("total_tests", @challenge.challenge_tests.count)
 
     # cur_test_line = 0
     # added_to_errors = false
@@ -97,6 +96,7 @@ class ChallengesController < ApplicationController
     respond_to do |format|
       if @challenge.save
         sync_new @challenge
+        @challenge.update_attribute("total_tests", @challenge.challenge_tests.count)
         format.html { redirect_to @challenge, notice: 'Challenge was successfully created.' }
         format.json { render json: @challenge, status: :created, location: @challenge }
       else
@@ -169,9 +169,7 @@ class ChallengesController < ApplicationController
          ROUND(AVG(lines),2) AS av_lines,
          SUM(test_score) AS total_score').where('challenge_id IN (?)', @ended)
 
-      @possible_scores = Challenge.joins(:entries).group(:user_id).select(
-        'user_id,
-         SUM(total_tests) AS total_poss').where('challenge.id IN (?)', @ended)
+      # @possible_scores = Challenge.joins(:entries).group(:user_id).select('user_id, SUM(total_tests) AS total_poss').where('challenge_id IN (?)', @ended)
     else
       @overalls = nil
       @possible_scores = nil
