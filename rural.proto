@@ -11,8 +11,8 @@ message RuralJob {
     }
 
     required JobType jobType = 1;
-    required string exprOrCode = 2;
-    required string filename = 3;
+    required string code = 2;
+    optional string expr = 3;
     repeated RuralTest test = 4;
 }
 

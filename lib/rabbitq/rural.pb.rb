@@ -4,26 +4,26 @@
 #     required string input = 1;
 #     repeated string output = 2;
 # }
-#
+# 
 # message RuralJob {
 #     enum JobType {
 #         EVAL = 0;
 #         COMPILE = 1;
 #         TEST = 2;
 #     }
-#
+# 
 #     required JobType jobType = 1;
-#     required string exprOrCode = 2;
-#     required string filename = 3;
+#     required string code = 2;
+#     optional string expr = 3;
 #     repeated RuralTest test = 4;
 # }
-#
+# 
 # message RuralTestOutcome {
 #     required bool passed = 1;
 #     required string userOutput = 2;
 #     required string expectedOutput = 3;
 # }
-#
+# 
 # message RuralTestResponse {
 #     repeated RuralTestOutcome outcome = 1;
 # }
@@ -38,30 +38,25 @@ class RuralTest < ::Protobuf::Message
   required :string, :input, 1
   repeated :string, :output, 2
 end
-
 class RuralJob < ::Protobuf::Message
   defined_in __FILE__
-
   class JobType < ::Protobuf::Enum
     defined_in __FILE__
     EVAL = value(:EVAL, 0)
     COMPILE = value(:COMPILE, 1)
     TEST = value(:TEST, 2)
   end
-
   required :JobType, :jobType, 1
-  required :string, :exprOrCode, 2
-  required :string, :filename, 3
+  required :string, :code, 2
+  optional :string, :expr, 3
   repeated :RuralTest, :test, 4
 end
-
 class RuralTestOutcome < ::Protobuf::Message
   defined_in __FILE__
   required :bool, :passed, 1
   required :string, :userOutput, 2
   required :string, :expectedOutput, 3
 end
-
 class RuralTestResponse < ::Protobuf::Message
   defined_in __FILE__
   repeated :RuralTestOutcome, :outcome, 1

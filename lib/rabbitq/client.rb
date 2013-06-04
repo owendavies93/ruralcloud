@@ -6,29 +6,29 @@ module Rabbitq
   class Client
     attr_accessor :thread
 
-    def self.publish(message, block, type, file, challenge)
-      new.publish(message, block, type, file, challenge)
+    def self.publish(message, block, type, code, challenge, user)
+      new.publish(message, block, type, code, challenge, user)
     end
 
-    def publish(message, block, type, file, challenge)
+    def publish(message, block, type, code, challenge, user)
       begin
-        user_id = file.partition('_').last
-        file = file + ".hs"
         puts message
+        puts code
 
         serialisedMessage = RuralJob.new
+
         if type == 0
           serialisedMessage.jobType = RuralJob::JobType::EVAL
+          serialisedMessage.expr = message
         elsif type == 1
           serialisedMessage.jobType = RuralJob::JobType::COMPILE
         elsif type == 2
           serialisedMessage.jobType = RuralJob::JobType::TEST
         end
-        serialisedMessage.exprOrCode = message
-        serialisedMessage.filename = file
+
+        serialisedMessage.code = code
 
         if type == 2
-          puts "hello!"
           # create some data structures containing tests
           tests = ChallengeTest.where(:challenge_id => challenge);
           tests.each do |test|
@@ -39,7 +39,6 @@ module Rabbitq
             end
             serialisedMessage.test << rtest
           end
-          serialisedMessage.exprOrCode = ""
         end
 
         m = serialisedMessage.to_s
@@ -63,9 +62,9 @@ module Rabbitq
                 puts "waited for " + corr_id
                 if type != 2
                   block.call(result, challenge)
-                  Pusher['private-' + user_id].trigger('remote-message', {:result => result})
+                  Pusher['private-' + user.to_s].trigger('remote-message', {:result => result})
                 else
-                  entry = Entry.where(:challenge_id => challenge, :user_id => user_id.to_i).first
+                  entry = Entry.where(:challenge_id => challenge, :user_id => user).first
 
                   passed_count = 0
 

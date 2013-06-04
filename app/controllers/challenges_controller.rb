@@ -203,8 +203,7 @@ class ChallengesController < ApplicationController
 
     sync @entry, :update
 
-    filename = "M" + @challenge.id + "_" + current_user.id.to_s
-    Rabbitq::Client::publish(params[:input], self, 2, filename, @challenge.id)
+    Rabbitq::Client::publish("", self, 2, params[:code], @challenge.id, current_user.id)
 
     respond_to do |format|
       format.js {}
@@ -213,12 +212,11 @@ class ChallengesController < ApplicationController
 
   def send_compile
     @entry = get_entry(params[:challenge])
-    @entry.update_attributes(:compilations =>  @entry.compilations + 1, :length => params[:length], :lines => params[:lines], :last_code => params[:input])
+    @entry.update_attributes(:compilations =>  @entry.compilations + 1, :length => params[:length], :lines => params[:lines], :last_code => params[:code])
 
     sync @entry, :update
 
-    filename = "M" + params[:challenge] + "_" + current_user.id.to_s
-    Rabbitq::Client::publish(params[:input], self, 1, filename, params[:challenge])
+    Rabbitq::Client::publish("", self, 1, params[:code], params[:challenge], current_user.id)
     throw :async
   end
 
@@ -228,8 +226,7 @@ class ChallengesController < ApplicationController
 
     sync @entry, :update
 
-    filename = "M" + params[:challenge] + "_" + current_user.id.to_s
-    Rabbitq::Client::publish(params[:input], self, 0, filename, params[:challenge])
+    Rabbitq::Client::publish(params[:input], self, 0, @entry.last_code, params[:challenge], current_user.id)
     throw :async
   end
 
@@ -242,8 +239,7 @@ class ChallengesController < ApplicationController
 
       if !@entry.submitted
         puts "sending test"
-        filename = "M" + params[:challenge] + "_" + u.id.to_s
-        Rabbitq::Client::publish("", self, 2, filename, params[:challenge])
+        Rabbitq::Client::publish("", self, 2, params[:code], params[:challenge], u.id)
       end
     end
 
