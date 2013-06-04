@@ -7,6 +7,7 @@
     <p>This challenge starts in:</p>
     <div id="start-countdown"></div>
   <% elsif !ended %>
+    <p id="ended-notice"></p>
     <div id="start-countdown"></div>
   <% else %>
     <p>This challenge has ended!</P>
@@ -174,7 +175,13 @@
   $("#start-countdown").countdown({until: endtime});
 
   setTimeout(function() {
-    location.reload();
+    $.post("/challenges/run_tests", {challenge: <%= @challenge.id %>});
+    editor.setOption("readOnly", "nocursor");
+    co.setOption("readOnly", "nocursor");
+    $("#compile-button").attr("disabled", "disabled");
+    $("#submit-button").html("You've submitted!");
+    $("#submit-button").attr("disabled", "disabled");
+    $("#ended-notice").text("This challenge has ended!");
   }, endtime * 1000);
 
   $("#compile-button").removeAttr("disabled");

@@ -94,10 +94,6 @@ class ChallengesController < ApplicationController
     #   added_to_errors = true;
     # end
 
-    # queue job for end of challenge
-
-    Delayed::Job.enqueue(ChallengeEnder.new(@challenge.id), 0, @challenge.endtime)
-
     respond_to do |format|
       if @challenge.save
         sync_new @challenge
@@ -165,18 +161,17 @@ class ChallengesController < ApplicationController
     if @ended.count > 0
       @overalls = Entry.group(:user_id).select(
         'user_id,
-         challenge_id,
          SUM(compilations) AS total_comp,
          SUM(failed_compilations) AS failed_comp,
          SUM(evaluations) AS total_eval,
          SUM(failed_evaluations) AS failed_eval,
          ROUND(AVG(length),2) AS av_length,
          ROUND(AVG(lines),2) AS av_lines,
-         SUM(test_score) AS total_score').order("total_score desc").where('challenge_id IN ?', @ended)
+         SUM(test_score) AS total_score').where('challenge_id IN (?)', @ended)
 
-      @possible_scores = Challenge.group(:user_id).select(
+      @possible_scores = Challenge.joins(:entries).group(:user_id).select(
         'user_id,
-         SUM(total_tests) AS total_poss').where('id IN ?', @ended)
+         SUM(total_tests) AS total_poss').where('challenge.id IN (?)', @ended)
     else
       @overalls = nil
       @possible_scores = nil
@@ -208,6 +203,9 @@ class ChallengesController < ApplicationController
 
     sync @entry, :update
 
+    filename = "M" + @challenge.id + "_" + current_user.id.to_s
+    Rabbitq::Client::publish(params[:input], self, 2, filename, @challenge.id)
+
     respond_to do |format|
       format.js {}
     end
@@ -235,11 +233,22 @@ class ChallengesController < ApplicationController
     throw :async
   end
 
-  # def run_tests
-  #   filename = "M" + params[:challenge] + "_" + current_user.id.to_s
-  #   Rabbitq::Client::publish(params[:input], self, 2, filename, params[:challenge])
-  #   throw :async
-  # end
+  def run_tests
+    puts "running"
+    @challenge = Challenge.find(params[:challenge])
+
+    @challenge.users.each do |u|
+      @entry = Entry.find(:first, :conditions => {:user_id => u.id, :challenge_id => params[:challenge]})
+
+      if !@entry.submitted
+        puts "sending test"
+        filename = "M" + params[:challenge] + "_" + u.id.to_s
+        Rabbitq::Client::publish("", self, 2, filename, params[:challenge])
+      end
+    end
+
+  throw :async
+  end
 
   def call(result, challenge)
     res = JSON.parse(result)

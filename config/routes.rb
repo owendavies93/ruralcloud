@@ -33,6 +33,9 @@ Ruralcloud::Application.routes.draw do
   post "challenges/send_eval"
   root :to => "challenges#send_eval"
 
+  post "challenges/run_tests"
+  root :to => "challenges#run_tests"
+
   post "challenges/push_github"
   root :to => "challenges#push_github"
 

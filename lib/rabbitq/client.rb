@@ -32,7 +32,6 @@ module Rabbitq
           # create some data structures containing tests
           tests = ChallengeTest.where(:challenge_id => challenge);
           tests.each do |test|
-            puts test
             rtest = RuralTest.new
             rtest.input = test.input
             test.outputs.each do |output|
@@ -66,7 +65,28 @@ module Rabbitq
                   block.call(result, challenge)
                   Pusher['private-' + user_id].trigger('remote-message', {:result => result})
                 else
-                  block.test_result(result, challenge, user_id)
+                  entry = Entry.where(:challenge_id => challenge, :user_id => user_id.to_i).first
+
+                  passed_count = 0
+
+                  response = RuralTestResponse.new
+                  response.parse_from_string result
+
+                  response.outcome.each do |output|
+                    outcome = TestOutcome.new do |o|
+                      o.entry_id = entry.id
+                      o.passed   = output.passed
+                      o.expected = output.expectedOutput
+                      o.recieved = output.userOutput
+
+                      if output.passed
+                        passed_count += 1
+                      end
+                    end
+                    outcome.save
+                  end
+
+                  entry.update_attribute("test_score", passed_count)
                 end
                 timer.cancel
               end

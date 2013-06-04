@@ -13,7 +13,7 @@
   </tr>
 
 <% if !@overalls.blank? %>
-  <% @overalls.each do |entry| %>
+  <% @overalls.order("total_score desc").each do |entry| %>
     <tr>
       <td><%= sanitize User.find(:first, :conditions => {id: entry.user_id}).email %></td>
       <td><%= entry.total_comp %></td>
