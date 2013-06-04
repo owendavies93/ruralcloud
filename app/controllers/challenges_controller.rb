@@ -189,6 +189,16 @@ class ChallengesController < ApplicationController
     @entries = @challenge.entries.order("test_score desc")
   end
 
+  def show_outcomes
+    @entry = Entry.where(:challenge_id => params[:id], :user_id => params[:user_id]).first
+    @tests = TestOutcome.where(:entry_id => @entry.id)
+    @inputs = ChallengeTest.where(:challenge_id => params[:id]).pluck(:input)
+
+    respond_to do |format|
+      format.js
+    end
+  end
+
   def submit
     @entry = get_entry(params[:id])
     @challenge = Challenge.find(params[:id])
@@ -247,8 +257,7 @@ class ChallengesController < ApplicationController
         Rabbitq::Client::publish("", self, 2, params[:code], params[:challenge], u.id)
       end
     end
-
-  throw :async
+    throw :async
   end
 
   def call(result, challenge)

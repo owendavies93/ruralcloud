@@ -1,7 +1,6 @@
 <% ended = has_ended(@challenge) %>
 <% if ended %>
   <h3>Leaderboard for Challenge #<%= @challenge.id %></h3>
-
   <table class="table table-striped">
     <tr>
       <th>User</th>
@@ -23,9 +22,19 @@
       <td><%= entry.failed_evaluations %></td>
       <td><%= entry.length %></td>
       <td><%= entry.lines %></td>
-      <td><%= entry.test_score %> / <% @challenge.total_tests %></td>
+      <td>
+          <%= entry.test_score %> / <%= @challenge.total_tests %> <%= link_to "Show Results", show_outcomes_path(@challenge.id, entry.user_id), {:remote => true, 'data-toggle' => 'modal', 'data-target' => "#outcomes-modal", 'data-backdrop' => true, 'data-keyboard' => true} %>
+      </td>
     </tr>
     <% end %>
+
+  <div class="modal hide fade" id="outcomes-modal">
+    <div class="modal-header">
+      <a href="#" class="close">×</a>
+      <h3>Fetching results...</h3>
+    </div>
+    <div class="modal-footer">&nbsp;</div>
+  </div>
 
   </table>
 <% else %>

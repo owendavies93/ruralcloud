@@ -11,6 +11,8 @@ Ruralcloud::Application.routes.draw do
 
   match "/leaderboards" => "challenges#global_leaderboard", :as => :global_leaderboard
 
+  match "/challenges/show_outcomes/:id/user=:user_id" => "challenges#show_outcomes", :as => :show_outcomes
+
   # custom routes for devise user stuff
   devise_for :users,
              :path => "",
