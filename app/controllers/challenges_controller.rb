@@ -169,7 +169,14 @@ class ChallengesController < ApplicationController
          ROUND(AVG(lines),2) AS av_lines,
          SUM(test_score) AS total_score').where('challenge_id IN (?)', @ended)
 
-      # @possible_scores = Challenge.joins(:entries).group(:user_id).select('user_id, SUM(total_tests) AS total_poss').where('challenge_id IN (?)', @ended)
+      sql = 'SELECT
+              R.user_id, SUM(R.total_tests) AS tt
+            FROM
+              ((SELECT id, total_tests FROM challenges) C
+              JOIN entries E ON E.challenge_id = C.id ) R
+            GROUP BY R.user_id'
+
+      @possible_scores = ActiveRecord::Base.connection.execute(sql)
     else
       @overalls = nil
       @possible_scores = nil
