@@ -74,6 +74,7 @@ Ruralcloud::Application.configure do
     :domain         => 'heroku.com',
     :enable_starttls_auto => true
   }
+  config.time_zone = 'London'
 
   # config for file upload to S3
   # config.paperclip_defaults = {
