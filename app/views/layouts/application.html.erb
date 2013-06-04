@@ -50,6 +50,13 @@
             fadeOut: { enabled: true, delay: 3000 }
           }).show();
         }
+
+        $(document).ready(function () {
+          $("#setting-tooltip").tooltip({
+            'selector': '',
+            'placement': 'bottom'
+          });
+        });
       <% end %>
     </script>
   </head>
@@ -71,14 +78,17 @@
             </ul>
             <% if get_next_start_time != "" %>
               <ul class="nav">
-                <li class="next-challenge center"><a>Next challenge starts in <%= get_next_start_time %></a></li>
+                <li class="next-challenge center"><div class="non-link">Next challenge starts in <%= get_next_start_time %></div></li>
               </ul>
             <% end %>
             <ul class="nav pull-right">
               <% if user_signed_in? %>
                 <li class="avatar"><%= image_tag gravatar_small(current_user) %></li>
-                <li><a>Logged in as <%= sanitize current_user.email %></a></li>
-                <li><%= link_to "Account Settings", edit_user_registration_path %></li>
+                <li>
+                  <%= link_to edit_user_registration_path, :rel => "tooltip", :title => "Account Settings", :id => "setting-tooltip" do %>
+                    <%= sanitize current_user.email %>
+                  <% end %>
+                </li>
                 <li><%= link_to "Logout", destroy_user_session_path %></li>
               <% else %>
                 <li><%= link_to "Login", new_user_session_path %></li>

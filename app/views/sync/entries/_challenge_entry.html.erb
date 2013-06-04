@@ -12,8 +12,10 @@
     <b>Evaluations: </b><%= entry.evaluations %><br/>
     <b>Code length: </b><%= entry.length %><br/>
     <b>Lines: </b><%= entry.lines %><br/>
-    <b>Realtime test score: </b>TODO<br/>
     <b>Failed Compilations: </b><%= entry.failed_compilations %><br/>
     <b>Failed Evaluations: </b><%= entry.failed_evaluations %><br/>
+    <% if entry.submitted %>
+      <b>Test score:</b> <%= entry.test_score %>
+    <% end %>
   </div>
 </div>

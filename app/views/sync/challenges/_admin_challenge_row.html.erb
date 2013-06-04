@@ -1,6 +1,10 @@
 <tr>
   <td><%= challenge.description %></td>
-  <td><%= challenge.difficulty %></td>
+  <td>
+    <div class="progress">
+      <div class="bar" style="width: <%= challenge.difficulty * 10 %>%"> <%= challenge.difficulty %> </div>
+    </div>
+  </td>
   <td><%= challenge.starttime %></td>
   <td><%= challenge.endtime %></td>
   <td><%= challenge.entries.length %></td>
