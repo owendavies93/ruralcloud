@@ -66,7 +66,7 @@ module Rabbitq
                   block.call(result, challenge)
                   Pusher['private-' + user_id].trigger('remote-message', {:result => result})
                 else
-                  block.test_result(result)
+                  block.test_result(result, challenge, user_id)
                 end
                 timer.cancel
               end

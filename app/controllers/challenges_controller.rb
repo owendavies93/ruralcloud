@@ -66,6 +66,8 @@ class ChallengesController < ApplicationController
   def create
     @challenge = Challenge.new(params[:challenge])
 
+    @challenge.update_attribute("total_tests", @challenge.challenge_tests.count)
+
     # cur_test_line = 0
     # added_to_errors = false
     # if params[:test_suite_file] != nil
@@ -92,6 +94,10 @@ class ChallengesController < ApplicationController
     #   added_to_errors = true;
     # end
 
+    # queue job for end of challenge
+
+    Delayed::Job.enqueue(ChallengeEnder.new(@challenge.id), 0, @challenge.endtime)
+
     respond_to do |format|
       if @challenge.save
         sync_new @challenge
@@ -108,6 +114,8 @@ class ChallengesController < ApplicationController
   # PUT /challenges/1.json
   def update
     @challenge = Challenge.find(params[:id])
+
+    @challenge.update_attribute("total_tests", @challenge.challenge_tests.count)
 
     respond_to do |format|
       if @challenge.update_attributes(params[:challenge])
@@ -152,21 +160,33 @@ class ChallengesController < ApplicationController
   end
 
   def global_leaderboard
-    @overalls = Entry.group(:user_id).select(
-      'user_id,
-       SUM(compilations) AS total_comp,
-       SUM(failed_compilations) AS failed_comp,
-       SUM(evaluations) AS total_eval,
-       SUM(failed_evaluations) AS failed_eval,
-       ROUND(AVG(length),2) AS av_length,
-       ROUND(AVG(lines),2) AS av_lines').order("total_comp desc")
+    @ended = Challenge.where('endtime < ?', Time.new.utc.inspect)
 
-    now = Time.new
-    @ended = Challenge.where('endtime < ?', now.inspect)
+    if @ended.count > 0
+      @overalls = Entry.group(:user_id).select(
+        'user_id,
+         challenge_id,
+         SUM(compilations) AS total_comp,
+         SUM(failed_compilations) AS failed_comp,
+         SUM(evaluations) AS total_eval,
+         SUM(failed_evaluations) AS failed_eval,
+         ROUND(AVG(length),2) AS av_length,
+         ROUND(AVG(lines),2) AS av_lines,
+         SUM(test_score) AS total_score').order("total_score desc").where('challenge_id IN ?', @ended)
+
+      @possible_scores = Challenge.group(:user_id).select(
+        'user_id,
+         SUM(total_tests) AS total_poss').where('id IN ?', @ended)
+    else
+      @overalls = nil
+      @possible_scores = nil
+    end
+
   end
 
   def leaderboard
     @challenge = Challenge.find(params[:id])
+    @entries = @challenge.entries.order("test_score desc")
   end
 
   def submit
@@ -215,11 +235,11 @@ class ChallengesController < ApplicationController
     throw :async
   end
 
-  def run_tests
-    filename = "M" + params[:challenge] + "_" + current_user.id.to_s
-    Rabbitq::Client::publish(params[:input], self, 2, filename, params[:challenge])
-    throw :async
-  end
+  # def run_tests
+  #   filename = "M" + params[:challenge] + "_" + current_user.id.to_s
+  #   Rabbitq::Client::publish(params[:input], self, 2, filename, params[:challenge])
+  #   throw :async
+  # end
 
   def call(result, challenge)
     res = JSON.parse(result)
@@ -257,14 +277,6 @@ class ChallengesController < ApplicationController
 
     Pusher['challenge-' + challenge].trigger('update_graphs',
       {:comp => comp, :f_comp => f_comp, :eval => eval, :f_eval => f_eval, :length => length, :lines => lines, :log => cur_challenge.log})
-  end
-
-  def test_result result
-    response = RuralTestResponse.new
-    response.parse_from_string result
-    response.outcome.each do |output|
-      puts output.inspect
-    end
   end
 
   def failed_eval challenge_id

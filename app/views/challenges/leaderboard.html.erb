@@ -14,7 +14,7 @@
       <th>Test Suite Score</th>
     </tr>
 
-    <% @challenge.entries.order("compilations desc").each do |entry| %>
+    <% @entries.each do |entry| %>
     <tr>
       <td><%= sanitize User.find(:first, :conditions => {id: entry.user_id}).email %></td>
       <td><%= entry.compilations %></td>
@@ -23,11 +23,11 @@
       <td><%= entry.failed_evaluations %></td>
       <td><%= entry.length %></td>
       <td><%= entry.lines %></td>
-      <td>TODO</td>
+      <td><%= entry.test_score %> + "/" + <% @challenge.total_tests %></td>
     </tr>
     <% end %>
 
   </table>
 <% else %>
-  <p>The leaderboard for this challenge will apear here once the challenge has ended.</p>
+  <p>The leaderboard for this challenge will appear here once the challenge has ended.</p>
 <% end %>

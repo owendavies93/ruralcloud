@@ -12,18 +12,19 @@
     <th>Test Suite Score</th>
   </tr>
 
-<% @overalls.each do |entry| %>
-  <tr>
-    <td><%= sanitize User.find(:first, :conditions => {id: entry.user_id}).email %></td>
-    <td><%= entry.total_comp %></td>
-    <td><%= entry.failed_comp %></td>
-    <td><%= entry.total_eval %></td>
-    <td><%= entry.failed_eval %></td>
-    <td><%= entry.av_length %></td>
-    <td><%= entry.av_lines %></td>
-    <td>TODO</td>
-  </tr>
-
+<% if !@overalls.blank? %>
+  <% @overalls.each do |entry| %>
+    <tr>
+      <td><%= sanitize User.find(:first, :conditions => {id: entry.user_id}).email %></td>
+      <td><%= entry.total_comp %></td>
+      <td><%= entry.failed_comp %></td>
+      <td><%= entry.total_eval %></td>
+      <td><%= entry.failed_eval %></td>
+      <td><%= entry.av_length %></td>
+      <td><%= entry.av_lines %></td>
+      <td><%= entry.total_score %> + "/" + <%= @possible_scores.find(entry.user_id).total_poss %></td>
+    </tr>
+  <% end %>
 <% end %>
 
 </table>

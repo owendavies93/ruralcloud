@@ -65,7 +65,6 @@
         </blockquote>
       </div>
       <a class="btn", id="popout">Pop out</a>
-      <a class="btn", id="runtests">Run tests</a>
     </div>
   </div>
 </div>
@@ -221,19 +220,19 @@
   });
 
   $("#github-button").click(function(){
-      $.post("/challenges/push_github",
-        {input: editor.getValue(), challenge: <%= @challenge.id %>, message: $('#commit').val()},function(data) {
-          if(data === null) {
-            $("#commit-response").text(data.message);
-          } else {
-            $("#github-button span").text("Committed!");
-            window.setTimeout(function () {
-              $("#github-button span").html('Commit to GitHub');
-            }, 3000);
-          };
-        }
-        ,"json")}
-      );
+    $.post("/challenges/push_github",
+      {input: editor.getValue(), challenge: <%= @challenge.id %>, message: $('#commit').val()},function(data) {
+        if(data === null) {
+          $("#commit-response").text(data.message);
+        } else {
+          $("#github-button span").text("Committed!");
+          window.setTimeout(function () {
+            $("#github-button span").html('Commit to GitHub');
+          }, 3000);
+        };
+      }
+      ,"json")}
+    );
 
   $("#popout").click(function() {
     if ($(this).text() == "Pop out") {
@@ -258,10 +257,6 @@
       co.setSize(null, 300);
       $(this).text("Pop out")
     }
-  });
-
-  $("#runtests").click(function(){
-    $.post("/challenges/run_tests", {challenge: <%= @challenge.id %>});
   });
 
   <% if !submitted %>
