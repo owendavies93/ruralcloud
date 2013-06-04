@@ -120,7 +120,7 @@ function setDateBox(id, default_time) {
       el.removeClass("error");
     }
     output.text(text);
-    date_output.val(date.utc(true).format(date_format));
+    date_output.val(date.format(date_format));
   });
   $('.clickable').click(function() {
     input.val($(this).html());

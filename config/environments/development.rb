@@ -45,4 +45,6 @@ Ruralcloud::Application.configure do
   Pusher.app_id = '45313'
   Pusher.key    = '2b4b300f074a5102bce6'
   Pusher.secret = 'fe3e8b2b92136504df82'
+
+  config.time_zone = "London"
 end
