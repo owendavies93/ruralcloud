@@ -2,7 +2,7 @@ class Challenge < ActiveRecord::Base
   validates :description, :owner, :spec, :presence => true
   validates :difficulty, :inclusion => {:in => 0..10, :message => "isn't between 1 and 10"}
   validate :not_in_past, :later_than_start, :not_invalid
-  attr_accessible :description, :difficulty, :endtime, :owner, :spec, :starttime, :log, :challenge_tests_attributes
+  attr_accessible :description, :difficulty, :endtime, :owner, :spec, :starttime, :log, :challenge_tests_attributes, :test_score, :total_tests
 
   has_many :entries, :dependent => :destroy
   has_many :users, :through => :entries

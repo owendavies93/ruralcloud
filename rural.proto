@@ -1,0 +1,27 @@
+message RuralTest {
+    required string input = 1;
+    repeated string output = 2;
+}
+
+message RuralJob {
+    enum JobType {
+        EVAL = 0;
+        COMPILE = 1;
+        TEST = 2;
+    }
+
+    required JobType jobType = 1;
+    required string exprOrCode = 2;
+    required string filename = 3;
+    repeated RuralTest test = 4;
+}
+
+message RuralTestOutcome {
+    required bool passed = 1;
+    required string userOutput = 2;
+    required string expectedOutput = 3;
+}
+
+message RuralTestResponse {
+    repeated RuralTestOutcome outcome = 1;
+}

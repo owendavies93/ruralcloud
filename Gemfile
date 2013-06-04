@@ -31,7 +31,8 @@ gem 'redcarpet'
 
 gem 'eventmachine'
 gem 'amqp'
-gem 'beefcake'
+# gem 'beefcake', :git => 'git://github.com/bmizerany/beefcake.git'
+gem 'ruby_protobuf'
 
 gem 'thin'
 
@@ -47,6 +48,10 @@ gem 'sync'
 gem 'octokit', :git => 'git://github.com/octokit/octokit.rb.git'
 
 gem 'nested_form'
+
+gem 'uri-handler'
+
+gem 'delayed_job_active_record'
 
 # To use ActiveModel has_secure_password
 # gem 'bcrypt-ruby', '~> 3.0.0'
