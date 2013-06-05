@@ -1,16 +1,18 @@
+<% content_for :title, "Edit Challenge" %>
+
 <% if user_signed_in?
-    if current_user.try(:admin?) && @challenge.owner == current_user.email %>
-        <h1>Editing challenge</h1>
+  if current_user.try(:admin?) && @challenge.owner == current_user.email %>
+    <h2>Editing challenge</h2>
 
-        <% if has_started(@challenge) %>
-            <p>You cannot edit this challenge, it has already started</p>
-        <% else %>
-            <%= render 'form' %>
-
-            <%= link_to 'Show', @challenge %> |
-            <%= link_to 'Back', challenges_path %>
-        <% end %>
+    <% if has_started(@challenge) %>
+      <p>You cannot edit this challenge, it has already started</p>
     <% else %>
-        <p>You're not the owner of this challenge!</p>
-    <% end
+      <%= render 'form' %>
+
+      <%= link_to 'Show', @challenge %> |
+      <%= link_to 'Back', challenges_path %>
+    <% end %>
+  <% else %>
+    <p>You're not the owner of this challenge!</p>
+  <% end
 end %>

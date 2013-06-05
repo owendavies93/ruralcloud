@@ -1,4 +1,5 @@
 <% ended = has_ended(@challenge) %>
+<% content_for :title, "Leaderboard for Challenge #" + @challenge.id.to_s %>
 <% if ended %>
   <h3>Leaderboard for Challenge #<%= @challenge.id %></h3>
   <table class="table table-striped">

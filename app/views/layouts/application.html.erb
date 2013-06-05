@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
   <head>
-    <title>Ruralcloud</title>
+    <title><%= (yield(:title) + " - " unless yield(:title).blank?).to_s + "RuralCloud" %></title>
     <%= stylesheet_link_tag    "application", :media => "all" %>
     <%= javascript_include_tag "application" %>
     <%= javascript_include_tag "http://js.pusherapp.com/1.9/pusher.min.js" %>
