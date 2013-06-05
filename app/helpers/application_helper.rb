@@ -2,7 +2,7 @@ require "net/http"
 
 module ApplicationHelper
   def gravatar user
-    avatar user, 64
+    avatar user, 80
   end
 
   def gravatar_small user
