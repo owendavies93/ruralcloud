@@ -86,7 +86,7 @@
                 <li class="avatar"><%= image_tag gravatar_small(current_user) %></li>
                 <li>
                   <%= link_to edit_user_registration_path, :rel => "tooltip", :title => "Account Settings", :id => "setting-tooltip" do %>
-                    <%= sanitize current_user.email %>
+                    <%= username_or_email(current_user.id) %>
                   <% end %>
                 </li>
                 <li><%= link_to "Logout", destroy_user_session_path %></li>

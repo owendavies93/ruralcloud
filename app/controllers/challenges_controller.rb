@@ -146,12 +146,12 @@ class ChallengesController < ApplicationController
 
     @challenge.users.each do |u|
       if u.id != current_user.id
-        Pusher['private-' + u.id.to_s].trigger('new_entrant', {:entrant => current_user.email, :id => @challenge.id.to_s})
+        Pusher['private-' + u.id.to_s].trigger('new_entrant', {:entrant => username_or_email(current_user.id, :id => @challenge.id.to_s})
       end
     end
 
     @owner = User.find(:first, :conditions => {:email => @challenge.owner})
-    Pusher['private-' + @owner.id.to_s].trigger('admin_entrant', {:entrant => current_user.email, :id => @challenge.id.to_s})
+    Pusher['private-' + @owner.id.to_s].trigger('admin_entrant', {:entrant => username_or_email(current_user.id, :id => @challenge.id.to_s})
     redirect_to :back, :notice => "You have entered this challenge!"
   end
 
@@ -206,12 +206,12 @@ class ChallengesController < ApplicationController
 
     @challenge.users.each do |u|
       if u.id != current_user.id
-        Pusher['private-' + u.id.to_s].trigger('entrant_submitted', {:entrant => current_user.email, :id => @challenge.id.to_s})
+        Pusher['private-' + u.id.to_s].trigger('entrant_submitted', {:entrant => username_or_email(current_user.id, :id => @challenge.id.to_s})
       end
     end
 
     @owner = User.find(:first, :conditions => {:email => @challenge.owner})
-    Pusher['private-' + @owner.id.to_s].trigger('admin_submitted', {:entrant => current_user.email, :id => @challenge.id.to_s})
+    Pusher['private-' + @owner.id.to_s].trigger('admin_submitted', {:entrant => username_or_email(current_user.id, :id => @challenge.id.to_s})
 
     # Send message to self, to close down interface
     Pusher['private-' + current_user.id.to_s].trigger('self_submitted', {})
@@ -313,7 +313,7 @@ class ChallengesController < ApplicationController
   def log message, challenge
     cur_challenge = Challenge.find(challenge)
     now = Time.new
-    cur_challenge.update_attribute("log", now.inspect + ": " + message + " - " + current_user.email + "\n" + cur_challenge.log)
+    cur_challenge.update_attribute("log", now.inspect + ": " + message + " - " + username_or_email(current_user.id) + "\n" + cur_challenge.log)
   end
 
   def get_entry challenge_id

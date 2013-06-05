@@ -16,7 +16,7 @@
 
     <% @entries.each do |entry| %>
     <tr>
-      <td><%= sanitize User.find(:first, :conditions => {id: entry.user_id}).email %></td>
+      <td><%= link_to username_or_email(entry.user_id), user_path(entry.user_id), {:remote => true, 'data-backdrop' => "true", 'data-keyboard' => "true", 'data-remote' => "true", 'data-target' => "#user-modal", 'data-toggle' => "modal"} %></td>
       <td><%= entry.compilations %></td>
       <td><%= entry.failed_compilations %></td>
       <td><%= entry.evaluations %></td>
@@ -24,12 +24,20 @@
       <td><%= entry.length %></td>
       <td><%= entry.lines %></td>
       <td>
-          <%= entry.test_score %> / <%= @challenge.total_tests %> <%= link_to "Show Results", show_outcomes_path(@challenge.id, entry.user_id), {:remote => true, 'data-toggle' => 'modal', 'data-target' => "#outcomes-modal", 'data-backdrop' => true, 'data-keyboard' => true} %>
+          <%= entry.test_score %> / <%= @challenge.total_tests %> <%= link_to "Show Results", show_outcomes_path(@challenge.id, entry.user_id), {:remote => true, 'data-toggle' => 'modal', 'data-target' => "#modal", 'data-backdrop' => true, 'data-keyboard' => true} %>
       </td>
     </tr>
     <% end %>
 
-  <div class="modal hide fade" id="outcomes-modal">
+  <div class="modal hide fade" id="modal">
+    <div class="modal-header">
+      <a href="#" class="close">×</a>
+      <h3>Fetching results...</h3>
+    </div>
+    <div class="modal-footer">&nbsp;</div>
+  </div>
+
+  <div class="modal hide fade" id="user-modal">
     <div class="modal-header">
       <a href="#" class="close">×</a>
       <h3>Fetching results...</h3>
