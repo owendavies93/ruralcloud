@@ -254,7 +254,7 @@ class ChallengesController < ApplicationController
 
       if !@entry.submitted
         puts "sending test"
-        Rabbitq::Client::publish("", self, 2, params[:code], params[:challenge], u.id)
+        Rabbitq::Client::publish("", self, 2, @entry.last_code, params[:challenge], u.id)
       end
     end
     throw :async

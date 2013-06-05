@@ -175,7 +175,7 @@
   $("#start-countdown").countdown({until: endtime});
 
   setTimeout(function() {
-    $.post("/challenges/run_tests", {code: editor.getValue(), challenge: <%= @challenge.id %>});
+    $.post("/challenges/run_tests", {challenge: <%= @challenge.id %>});
     editor.setOption("readOnly", "nocursor");
     co.setOption("readOnly", "nocursor");
     $("#compile-button").attr("disabled", "disabled");

@@ -14,10 +14,10 @@
     <dd><%= @challenge.difficulty %></dd>
     <dt>Start time:</dt>
     <dd><%= @challenge.starttime %>
-        <% if started && !ended %><br/>This challenge has started!<% end %></dd>
+        <% if started && !ended %><p class="started-notice">This challenge has started!</p><% end %></dd>
     <dt>End time:</dt>
     <dd><%= @challenge.endtime %>
-        <% if ended %><br/>This challenge has ended.<% end %></dd>
+        <% if ended %><p class="ended-notice">This challenge has ended.</p><% end %></dd>
     <dt>Owner:</dt>
     <dd><%= @challenge.owner %></dd>
   </dl>
@@ -178,7 +178,9 @@
     });
 
     setTimeout(function() {
-      location.reload();
+      $.post("/challenges/run_tests", {challenge: <%= @challenge.id $>});
+      $("#started-notice").text("");
+      $("#ended-notice").text("This challenge has ended!");
     }, endtime * 1000);
 
     function simpleFormat(str) {
