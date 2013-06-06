@@ -8,9 +8,14 @@
     <div class="row-fluid">
       <div class="span10">
         <% if !@user.bio.blank? %>
-          <%= @user.bio %>
+          <p><%= @user.bio %></p>
         <% else %>
           <p>This user has no bio!</p>
+        <% end %>
+        <% if !@user.max_difficulty || @user.max_difficulty == 10 %>
+          <p>This user does not filter challenges by difficulty. Hardcore!</p>
+        <% else %>
+          <p>This user enters challenges of difficulty <%= @user.max_difficulty %> and under.</p>
         <% end %>
       </div>
       <div class="pull-right">
