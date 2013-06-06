@@ -219,7 +219,6 @@ class ChallengesController < ApplicationController
 
   def kick
     if current_user.try(:admin?)
-      puts params
       @entry = Entry.where(:challenge_id => params[:challenge], :user_id => params[:user]).first
       @entry.destroy
 
@@ -234,10 +233,17 @@ class ChallengesController < ApplicationController
         end
       end
 
-      respond_to do |format|
-        format.js {}
-      end
+      render :nothing => true, :status => 200
     end
+  end
+
+  def report_error
+    @challenge = Challenge.find(params[:id])
+    @owner = User.find(id_from_uoe @challenge.owner)
+
+    Pusher['private-' + @owner.id.to_s].trigger('challenge_error', {:id => params[:id], :sender => params[:sender], :message => params[:message]})
+
+    render :nothing => true, :status => 200
   end
 
   def submit
@@ -251,7 +257,7 @@ class ChallengesController < ApplicationController
       end
     end
 
-    @owner = User.find(:first, :conditions => {:email => @challenge.owner})
+    @owner = User.find(id_from_uoe @challenge.owner)
     Pusher['private-' + @owner.id.to_s].trigger('admin_submitted', {:entrant => username_or_email(current_user.id), :id => @challenge.id.to_s})
 
     # Send message to self, to close down interface
@@ -259,11 +265,9 @@ class ChallengesController < ApplicationController
 
     sync @entry, :update
 
-    Rabbitq::Client::publish("", self, 2, params[:code], @challenge.id, current_user.id)
+    Rabbitq::Client::publish("", self, 2, @entry.last_code, @challenge.id, current_user.id)
 
-    respond_to do |format|
-      format.js {}
-    end
+    render :nothing => true, :status => 200
   end
 
   def send_compile
@@ -287,14 +291,12 @@ class ChallengesController < ApplicationController
   end
 
   def run_tests
-    puts "running"
     @challenge = Challenge.find(params[:challenge])
 
     @challenge.users.each do |u|
       @entry = Entry.find(:first, :conditions => {:user_id => u.id, :challenge_id => params[:challenge]})
 
       if !@entry.submitted
-        puts "sending test"
         Rabbitq::Client::publish("", self, 2, @entry.last_code, params[:challenge], u.id)
       end
     end

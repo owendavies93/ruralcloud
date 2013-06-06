@@ -45,5 +45,8 @@ Ruralcloud::Application.routes.draw do
   post "challenges/push_github"
   root :to => "challenges#push_github"
 
+  post "challenges/report_error"
+  root :to => "challenges#report_error"
+
   post "pusher/auth"
 end

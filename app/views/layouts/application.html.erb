@@ -46,6 +46,21 @@
             msg = data.entrant + 'has submitted their final code for <a href="/challenges/' + data.id + '">a challenge you are in</a>.';
             dom_notify(msg);
           });
+
+          user_channel.bind('challenge_error', function(data) {
+            msg = '<p>An error has been reported in <a href="/challenges/' + data.id + '">challenge #' + data.id + '</a></p>' +
+                  '<p>Message from ' + data.sender + ':</p>' +
+                  '<p>' + data.message + '</p>';
+            center_notify(msg);
+          });
+
+          function center_notify(msg) {
+            $('#center-notify').notify({
+              message: { html: msg },
+              closeable: true,
+              fadeOut: { enabled: false }
+            }).show();
+          }
         <% end %>
 
         function dom_notify(msg) {
@@ -82,7 +97,7 @@
             </ul>
             <% if get_next_start_time != "" %>
               <ul class="nav">
-                <li class="next-challenge center"><div class="non-link">Next challenge starts in <%= get_next_start_time %></div></li>
+                <li class="next-challenge"><div class="non-link" style="text-align:center">Next challenge starts in <%= get_next_start_time %></div></li>
               </ul>
             <% end %>
             <ul class="nav pull-right">
@@ -108,6 +123,7 @@
       </div>
 
       <div class="notifications bottom-left"></div>
+      <div class="notifications center" id="center-notify"></div>
 
       <div id="push"></div>
     </div>
