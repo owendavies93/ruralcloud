@@ -8,8 +8,11 @@ class ChallengesController < ApplicationController
   # GET /challenges.json
   def index
     now = Time.new.utc
-    @not_started = Challenge.where('starttime > ?', now.inspect)
-    @running = Challenge.where('starttime < ? AND endtime > ?', now.inspect, now.inspect)
+
+    difficulty = current_user.try(:admin?) || !current_user.max_difficulty ? 10 : current_user.max_difficulty
+
+    @not_started = Challenge.where('starttime > ? AND difficulty <= ?', now.inspect, difficulty)
+    @running = Challenge.where('starttime < ? AND endtime > ? AND difficulty <= ?', now.inspect, now.inspect, difficulty)
 
     respond_to do |format|
       format.html # index.html.erb

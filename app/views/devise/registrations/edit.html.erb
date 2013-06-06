@@ -19,7 +19,12 @@
         <p><i>Add a username to be seen by other users instead of your email:</i><br/>
         <%= f.text_field :username, :placeholder => "Username" %></p>
 
-        <p><%= f.text_area :bio, :placeholder => "Bio", :rows => "5" %></p>
+        <p><%= f.text_area :bio, :placeholder => "Bio", :rows => "5", :style => "width:90%" %></p>
+
+        <% if !current_user.try(:admin?) %>
+          <p><i>Add a maximum difficulty to filter out harder challenges:</i><br/>
+          <%= f.number_field :max_difficulty, :placeholder => "Difficulty (0-10)" %></p>
+        <% end %>
 
         <p>Editor theme:<br/>
         <%= f.select :editor_theme, [['default','default'],['blackboard','blackboard'],['eclipse','eclipse'],['monokai','monokai']], {}, :onchange => "selectTheme()" %></p>
