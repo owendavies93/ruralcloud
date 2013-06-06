@@ -23,6 +23,7 @@
       <table class="table table-striped">
         <tr>
           <th>#</th>
+          <th>Difficulty</th>
           <th>Compilations</th>
           <th>Failed Compilations</th>
           <th>Evaluations</th>
@@ -34,6 +35,18 @@
         <% @challenges.each do |entry| %>
           <tr>
             <td><%= link_to entry.challenge_id, show_leaderboard_path(entry.challenge_id) %></td>
+            <td>
+              <div class="progress
+            <% if entry.difficulty.to_i < 4 %>
+               progress-success">
+            <% elsif entry.difficulty.to_i < 8 %>
+              progress-warning">
+            <% else %>
+              progress-danger">
+            <% end %>
+                <div class="bar" style="width: <%= entry.difficulty.to_i * 10 %>%"></div>
+              </div>
+            </td>
             <td><%= entry.compilations %></td>
             <td><%= entry.failed_compilations %></td>
             <td><%= entry.evaluations %></td>

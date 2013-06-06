@@ -1,8 +1,15 @@
 <tr>
   <td><%= challenge.description %></td>
   <td>
-    <div class="progress">
-      <div class="bar" style="width: <%= challenge.difficulty * 10 %>%"> <%= challenge.difficulty %> </div>
+    <div class="progress
+  <% if challenge.difficulty < 4 %>
+     progress-success">
+  <% elsif challenge.difficulty < 8 %>
+    progress-warning">
+  <% else %>
+    progress-danger">
+  <% end %>
+      <div class="bar" style="width: <%= challenge.difficulty * 10 %>%"></div>
     </div>
   </td>
   <td><%= challenge.starttime %></td>

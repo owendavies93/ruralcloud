@@ -23,7 +23,7 @@
   </dl>
 
 <% if user_signed_in? %>
-  <% if current_user.email == @challenge.owner && !started %>
+  <% if username_or_email(current_user.id) == @challenge.owner && !started %>
     <%= link_to 'Edit', edit_challenge_path(@challenge), :class => "btn" %>
   <% elsif !started %>
     <%= link_to 'Enter Challenge', enter_challenge_path, :class => "btn" %>
@@ -178,7 +178,7 @@
     });
 
     setTimeout(function() {
-      $.post("/challenges/run_tests", {challenge: <%= @challenge.id $>});
+      $.post("/challenges/run_tests", {challenge: <%= @challenge.id %>});
       $("#started-notice").text("");
       $("#ended-notice").text("This challenge has ended!");
     }, endtime * 1000);
