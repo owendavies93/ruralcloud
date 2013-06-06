@@ -153,9 +153,24 @@ class ChallengesController < ApplicationController
       end
     end
 
-    @owner = User.find(:first, :conditions => {:email => @challenge.owner})
+    @owner = User.find(id_from_uoe @challenge.owner)
     Pusher['private-' + @owner.id.to_s].trigger('admin_entrant', {:entrant => username_or_email(current_user.id), :id => @challenge.id.to_s})
     redirect_to :back, :notice => "You have entered this challenge!"
+  end
+
+  def id_from_uoe uoe
+    user = User.where(:email => uoe).first
+
+    if user == nil
+      user = User.where(:username => uoe).first
+    end
+    return user.id
+  end
+
+  def username_or_email id
+    user = User.find(id)
+
+    user.username.blank? ? sanitize(user.email) : user.username
   end
 
   def global_leaderboard
@@ -199,6 +214,29 @@ class ChallengesController < ApplicationController
 
     respond_to do |format|
       format.js
+    end
+  end
+
+  def kick
+    if current_user.try(:admin?)
+      puts params
+      @entry = Entry.where(:challenge_id => params[:challenge], :user_id => params[:user]).first
+      @entry.destroy
+
+      sync @entry, :destroy
+
+      Pusher['private-' + params[:user].to_s].trigger('kicked', {})
+
+      challenge = Challenge.find(params[:challenge])
+      challenge.users.each do |u|
+        if u.id != params[:user]
+          Pusher['private-' + u.id.to_s].trigger('entrant_kicked', {:entrant => username_or_email(params[:user]), :id => @challenge.id.to_s})
+        end
+      end
+
+      respond_to do |format|
+        format.js {}
+      end
     end
   end
 

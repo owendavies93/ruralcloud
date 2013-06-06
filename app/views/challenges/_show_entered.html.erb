@@ -161,7 +161,7 @@
 <% if !started %>
 
   <% now = Time.new %>
-  var starttime = <%= @challenge.starttime.minus_with_coercion(now) %>;
+  var starttime = <%= @challenge.starttime.minus_with_coercion(now + 1.hour) %>;
   $("#start-countdown").countdown({until: starttime});
 
   setTimeout(function() {
@@ -171,7 +171,7 @@
 <% elsif !ended %>
 
   <% now = Time.new %>
-  var endtime = <%= @challenge.endtime.minus_with_coercion(now) %>;
+  var endtime = <%= @challenge.endtime.minus_with_coercion(now + 1.hour) %>;
   $("#start-countdown").countdown({until: endtime});
 
   setTimeout(function() {
@@ -273,6 +273,15 @@
       $("#compile-button").attr("disabled", "disabled");
       $("#submit-button").html("You've submitted!");
       $("#submit-button").attr("disabled", "disabled");
+    });
+
+    user_channel.bind('kicked', function() {
+      editor.setOption("readOnly", "nocursor");
+      co.setOption("readOnly", "nocursor");
+      $("#compile-button").attr("disabled", "disabled");
+      $("#submit-button").attr("disabled", "disabled");
+      $("#ended-notice").text("You have been kicked from this challenge.");
+      alert("You have been kicked from this challenge");
     });
   <% else %>
     $("#compile-button").attr("disabled", "disabled");

@@ -167,7 +167,7 @@
 
   <% if started %>
     <% now = Time.new %>
-    var endtime = <%= @challenge.endtime.minus_with_coercion(now) %>;
+    var endtime = <%= @challenge.endtime.minus_with_coercion(now + 1.hour) %>;
     $("#start-countdown").countdown({until: endtime});
 
     var challenge_channel = pusher.subscribe('challenge-<%= @challenge.id %>');

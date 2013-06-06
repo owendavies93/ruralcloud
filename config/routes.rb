@@ -15,6 +15,8 @@ Ruralcloud::Application.routes.draw do
 
   match "/users/:id" => "users#show", :as => :user
 
+  match "/challenges/kick/:challenge/:user" => "challenges#kick", :as => :kick
+
   # custom routes for devise user stuff
   devise_for :users,
              :path => "",
