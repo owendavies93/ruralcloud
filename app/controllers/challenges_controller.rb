@@ -170,7 +170,7 @@ class ChallengesController < ApplicationController
   def username_or_email id
     user = User.find(id)
 
-    user.username.blank? ? sanitize(user.email) : user.username
+    user.username.blank? ? ActionController::Base.helpers.sanitize(user.email) : user.username
   end
 
   def global_leaderboard
