@@ -305,12 +305,12 @@ html, body {
   padding: 20px 0;
 }
 
-.commit .box {
-  width: 65%;
-}
-
 .commit .warning {
   padding: 40px 0;
   color: red;
   font-weight: bold;
+}
+
+.input-append .btn.dropdown-toggle {
+    float: none;
 }
