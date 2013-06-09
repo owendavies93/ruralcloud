@@ -23,30 +23,49 @@
         var user_channel = pusher.subscribe('private-<%= current_user.id %>');
 
         user_channel.bind('new_entrant', function(data) {
-          msg = data.entrant + ' has entered <a href="/challenges/' + data.id + '>a challenge you are in</a>.';
+          msg = data.entrant + ' has entered <a href="/challenges/' + data.id + '">a challenge you are in</a>.';
           dom_notify(msg);
         });
 
         user_channel.bind('entrant_submitted', function(data) {
-          msg = data.entrant + ' has submitted their final code for <a href="/challenges/' + data.id + '>a challenge you are in</a>.';
+          msg = data.entrant + ' has submitted their final code for <a href="/challenges/' + data.id + '">a challenge you are in</a>.';
           dom_notify(msg);
+        });
+
+        user_channel.bind('entrant_kicked', function(data) {
+          msg = data.entrant + ' has been kicked from <a href="/challenges/' + data.id + '">a challenge you are in</a>.';
         });
 
         <% if current_user.try(:admin?) %>
           user_channel.bind('admin_entrant', function(data) {
-            msg = data.entrant + 'has entered <a href="/challenges/' + data.id + '>your challenge</a>!';
+            msg = data.entrant + 'has entered <a href="/challenges/' + data.id + '">your challenge</a>!';
             dom_notify(msg);
           });
 
           user_channel.bind('admin_submitted', function(data) {
-            msg = data.entrant + 'has submitted their final code for <a href="/challenges/' + data.id + '>a challenge you are in</a>.';
+            msg = data.entrant + 'has submitted their final code for <a href="/challenges/' + data.id + '">a challenge you are in</a>.';
             dom_notify(msg);
           });
+
+          user_channel.bind('challenge_error', function(data) {
+            msg = '<p>An error has been reported in <a href="/challenges/' + data.id + '">challenge #' + data.id + '</a></p>' +
+                  '<p>Message from ' + data.sender + ':</p>' +
+                  '<p>' + data.message + '</p>';
+            center_notify(msg);
+          });
+
+          function center_notify(msg) {
+            $('#center-notify').notify({
+              message: { html: msg },
+              closeable: true,
+              fadeOut: { enabled: false }
+            }).show();
+          }
         <% end %>
 
         function dom_notify(msg) {
           $('.bottom-left').notify({
-            message: { text: msg },
+            message: { html: msg },
             fadeOut: { enabled: true, delay: 3000 }
           }).show();
         }
@@ -78,7 +97,7 @@
             </ul>
             <% if get_next_start_time != "" %>
               <ul class="nav">
-                <li class="next-challenge center"><div class="non-link">Next challenge starts in <%= get_next_start_time %></div></li>
+                <li class="next-challenge"><div class="non-link" style="text-align:center">Next challenge starts in <%= get_next_start_time %></div></li>
               </ul>
             <% end %>
             <ul class="nav pull-right">
@@ -86,7 +105,7 @@
                 <li class="avatar"><%= image_tag gravatar_small(current_user) %></li>
                 <li>
                   <%= link_to edit_user_registration_path, :rel => "tooltip", :title => "Account Settings", :id => "setting-tooltip" do %>
-                    <%= sanitize current_user.email %>
+                    <%= username_or_email(current_user.id) %>
                   <% end %>
                 </li>
                 <li><%= link_to "Logout", destroy_user_session_path %></li>
@@ -104,6 +123,7 @@
       </div>
 
       <div class="notifications bottom-left"></div>
+      <div class="notifications center" id="center-notify"></div>
 
       <div id="push"></div>
     </div>

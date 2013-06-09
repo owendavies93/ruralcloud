@@ -59,7 +59,7 @@
     </div>
   </div>
   <div class="field">
-    <%= f.hidden_field :owner, :value => sanitize(current_user.email) %>
+    <%= f.hidden_field :owner, :value => username_or_email(current_user.id) %>
   </div>
   <div class="actions">
     <%= f.submit "Submit Challenge", :class => "btn" %>

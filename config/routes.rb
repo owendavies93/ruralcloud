@@ -7,11 +7,15 @@ Ruralcloud::Application.routes.draw do
 
   match "/challenges/submit/:id" => "challenges#submit", :as => :submit_challenge
 
-  match "/leaderboards/:id" => "challenges#leaderboard"
+  match "/leaderboards/:id" => "challenges#leaderboard", :as => :show_leaderboard
 
   match "/leaderboards" => "challenges#global_leaderboard", :as => :global_leaderboard
 
   match "/challenges/show_outcomes/:id/user=:user_id" => "challenges#show_outcomes", :as => :show_outcomes
+
+  match "/users/:id" => "users#show", :as => :user
+
+  match "/challenges/kick/:challenge/:user" => "challenges#kick", :as => :kick
 
   # custom routes for devise user stuff
   devise_for :users,
@@ -46,6 +50,9 @@ Ruralcloud::Application.routes.draw do
 
   post "challenges/get_repo_data"
   root :to => "challenges#get_repo_data"
+
+  post "challenges/report_error"
+  root :to => "challenges#report_error"
 
   post "pusher/auth"
 end

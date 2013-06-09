@@ -1,7 +1,7 @@
 <% content_for :title, "Edit Challenge" %>
 
 <% if user_signed_in?
-  if current_user.try(:admin?) && @challenge.owner == current_user.email %>
+  if current_user.try(:admin?) && @challenge.owner == username_or_email(current_user.id) %>
     <h2>Editing challenge</h2>
 
     <% if has_started(@challenge) %>

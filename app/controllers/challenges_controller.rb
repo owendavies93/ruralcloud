@@ -8,9 +8,12 @@ class ChallengesController < ApplicationController
   # GET /challenges.json
   def index
     now = Time.new.utc
-    @not_started = Challenge.where('starttime > ?', now.inspect)
-    @running = Challenge.where('starttime < ? AND endtime > ?', now.inspect, now.inspect)
-    
+
+    difficulty = current_user.try(:admin?) || !current_user.max_difficulty ? 10 : current_user.max_difficulty
+
+    @not_started = Challenge.where('starttime > ? AND difficulty <= ?', now.inspect, difficulty)
+    @running = Challenge.where('starttime < ? AND endtime > ? AND difficulty <= ?', now.inspect, now.inspect, difficulty)
+
     respond_to do |format|
       format.html # index.html.erb
       format.json { render json: @challenges }
@@ -146,13 +149,28 @@ class ChallengesController < ApplicationController
 
     @challenge.users.each do |u|
       if u.id != current_user.id
-        Pusher['private-' + u.id.to_s].trigger('new_entrant', {:entrant => current_user.email, :id => @challenge.id.to_s})
+        Pusher['private-' + u.id.to_s].trigger('new_entrant', {:entrant => username_or_email(current_user.id), :id => @challenge.id.to_s})
       end
     end
 
-    @owner = User.find(:first, :conditions => {:email => @challenge.owner})
-    Pusher['private-' + @owner.id.to_s].trigger('admin_entrant', {:entrant => current_user.email, :id => @challenge.id.to_s})
+    @owner = User.find(id_from_uoe @challenge.owner)
+    Pusher['private-' + @owner.id.to_s].trigger('admin_entrant', {:entrant => username_or_email(current_user.id), :id => @challenge.id.to_s})
     redirect_to :back, :notice => "You have entered this challenge!"
+  end
+
+  def id_from_uoe uoe
+    user = User.where(:email => uoe).first
+
+    if user == nil
+      user = User.where(:username => uoe).first
+    end
+    return user.id
+  end
+
+  def username_or_email id
+    user = User.find(id)
+
+    user.username.blank? ? ActionController::Base.helpers.sanitize(user.email) : user.username
   end
 
   def global_leaderboard
@@ -199,6 +217,35 @@ class ChallengesController < ApplicationController
     end
   end
 
+  def kick
+    if current_user.try(:admin?)
+      @entry = Entry.where(:challenge_id => params[:challenge], :user_id => params[:user]).first
+      @entry.destroy
+
+      sync @entry, :destroy
+
+      Pusher['private-' + params[:user].to_s].trigger('kicked', {})
+
+      challenge = Challenge.find(params[:challenge])
+      challenge.users.each do |u|
+        if u.id != params[:user]
+          Pusher['private-' + u.id.to_s].trigger('entrant_kicked', {:entrant => username_or_email(params[:user]), :id => @challenge.id.to_s})
+        end
+      end
+
+      render :nothing => true, :status => 200
+    end
+  end
+
+  def report_error
+    @challenge = Challenge.find(params[:id])
+    @owner = User.find(id_from_uoe @challenge.owner)
+
+    Pusher['private-' + @owner.id.to_s].trigger('challenge_error', {:id => params[:id], :sender => params[:sender], :message => params[:message]})
+
+    render :nothing => true, :status => 200
+  end
+
   def submit
     @entry = get_entry(params[:id])
     @challenge = Challenge.find(params[:id])
@@ -206,23 +253,21 @@ class ChallengesController < ApplicationController
 
     @challenge.users.each do |u|
       if u.id != current_user.id
-        Pusher['private-' + u.id.to_s].trigger('entrant_submitted', {:entrant => current_user.email, :id => @challenge.id.to_s})
+        Pusher['private-' + u.id.to_s].trigger('entrant_submitted', {:entrant => username_or_email(current_user.id), :id => @challenge.id.to_s})
       end
     end
 
-    @owner = User.find(:first, :conditions => {:email => @challenge.owner})
-    Pusher['private-' + @owner.id.to_s].trigger('admin_submitted', {:entrant => current_user.email, :id => @challenge.id.to_s})
+    @owner = User.find(id_from_uoe @challenge.owner)
+    Pusher['private-' + @owner.id.to_s].trigger('admin_submitted', {:entrant => username_or_email(current_user.id), :id => @challenge.id.to_s})
 
     # Send message to self, to close down interface
     Pusher['private-' + current_user.id.to_s].trigger('self_submitted', {})
 
     sync @entry, :update
 
-    Rabbitq::Client::publish("", self, 2, params[:code], @challenge.id, current_user.id)
+    Rabbitq::Client::publish("", self, 2, @entry.last_code, @challenge.id, current_user.id)
 
-    respond_to do |format|
-      format.js {}
-    end
+    render :nothing => true, :status => 200
   end
 
   def send_compile
@@ -246,15 +291,13 @@ class ChallengesController < ApplicationController
   end
 
   def run_tests
-    puts "running"
     @challenge = Challenge.find(params[:challenge])
 
     @challenge.users.each do |u|
       @entry = Entry.find(:first, :conditions => {:user_id => u.id, :challenge_id => params[:challenge]})
 
       if !@entry.submitted
-        puts "sending test"
-        Rabbitq::Client::publish("", self, 2, params[:code], params[:challenge], u.id)
+        Rabbitq::Client::publish("", self, 2, @entry.last_code, params[:challenge], u.id)
       end
     end
     throw :async
@@ -313,7 +356,7 @@ class ChallengesController < ApplicationController
   def log message, challenge
     cur_challenge = Challenge.find(challenge)
     now = Time.new
-    cur_challenge.update_attribute("log", now.inspect + ": " + message + " - " + current_user.email + "\n" + cur_challenge.log)
+    cur_challenge.update_attribute("log", now.inspect + ": " + message + " - " + username_or_email(current_user.id) + "\n" + cur_challenge.log)
   end
 
   def get_entry challenge_id

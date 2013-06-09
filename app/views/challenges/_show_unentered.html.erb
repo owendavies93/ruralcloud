@@ -14,16 +14,16 @@
     <dd><%= @challenge.difficulty %></dd>
     <dt>Start time:</dt>
     <dd><%= @challenge.starttime %>
-        <% if started && !ended %><br/>This challenge has started!<% end %></dd>
+        <% if started && !ended %><p class="started-notice">This challenge has started!</p><% end %></dd>
     <dt>End time:</dt>
     <dd><%= @challenge.endtime %>
-        <% if ended %><br/>This challenge has ended.<% end %></dd>
+        <% if ended %><p class="ended-notice">This challenge has ended.</p><% end %></dd>
     <dt>Owner:</dt>
     <dd><%= @challenge.owner %></dd>
   </dl>
 
 <% if user_signed_in? %>
-  <% if current_user.email == @challenge.owner && !started %>
+  <% if username_or_email(current_user.id) == @challenge.owner && !started %>
     <%= link_to 'Edit', edit_challenge_path(@challenge), :class => "btn" %>
   <% elsif !started %>
     <%= link_to 'Enter Challenge', enter_challenge_path, :class => "btn" %>
@@ -167,7 +167,7 @@
 
   <% if started %>
     <% now = Time.new %>
-    var endtime = <%= @challenge.endtime.minus_with_coercion(now) %>;
+    var endtime = <%= @challenge.endtime.minus_with_coercion(now + 1.hour) %>;
     $("#start-countdown").countdown({until: endtime});
 
     var challenge_channel = pusher.subscribe('challenge-<%= @challenge.id %>');
@@ -178,7 +178,9 @@
     });
 
     setTimeout(function() {
-      location.reload();
+      $.post("/challenges/run_tests", {challenge: <%= @challenge.id %>});
+      $("#started-notice").text("");
+      $("#ended-notice").text("This challenge has ended!");
     }, endtime * 1000);
 
     function simpleFormat(str) {

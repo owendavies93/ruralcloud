@@ -17,7 +17,7 @@
 <% if !@overalls.blank? %>
   <% @overalls.order("total_score desc").each do |entry| %>
     <tr>
-      <td><%= sanitize User.find(:first, :conditions => {id: entry.user_id}).email %></td>
+      <td><%= link_to username_or_email(entry.user_id), user_path(entry.user_id), {:remote => true, 'data-backdrop' => "true", 'data-keyboard' => "true", 'data-remote' => "true", 'data-target' => "#user-modal", 'data-toggle' => "modal"} %></td>
       <td><%= entry.total_comp %></td>
       <td><%= entry.failed_comp %></td>
       <td><%= entry.total_eval %></td>
@@ -30,6 +30,13 @@
 <% end %>
 
 </table>
+
+<div class="modal hide fade" id="user-modal">
+  <div class="modal-header">
+    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>    <h3>Fetching results...</h3>
+  </div>
+  <div class="modal-footer">&nbsp;</div>
+</div>
 
 View leaderboard for ended challenge:<br/>
 <%= select_tag "challenge_id", options_from_collection_for_select(@ended, 'id', 'id'), :include_blank => "" %>
