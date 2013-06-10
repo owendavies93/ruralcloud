@@ -38,12 +38,12 @@
 
         <% if current_user.try(:admin?) %>
           user_channel.bind('admin_entrant', function(data) {
-            msg = data.entrant + 'has entered <a href="/challenges/' + data.id + '">your challenge</a>!';
+            msg = data.entrant + ' has entered <a href="/challenges/' + data.id + '">your challenge</a>!';
             dom_notify(msg);
           });
 
           user_channel.bind('admin_submitted', function(data) {
-            msg = data.entrant + 'has submitted their final code for <a href="/challenges/' + data.id + '">a challenge you are in</a>.';
+            msg = data.entrant + ' has submitted their final code for <a href="/challenges/' + data.id + '">a challenge you are in</a>.';
             dom_notify(msg);
           });
 
