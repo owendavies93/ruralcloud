@@ -1,0 +1,11 @@
+# Read about fixtures at http://api.rubyonrails.org/classes/ActiveRecord/Fixtures.html
+
+one:
+  branch: MyString
+  file_hash: MyString
+  entry_id: 1
+
+two:
+  branch: MyString
+  file_hash: MyString
+  entry_id: 1

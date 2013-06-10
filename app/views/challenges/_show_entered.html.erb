@@ -27,9 +27,13 @@
       <% if started && !ended %>
         <% if current_user.github_id%>
           <div class='commit'>
-            <input id="commit" type="text" class='box pull-left' placeholder="Commit from RuralCloud"/>
-            <a id="github-button" class="btn pull-right" ><i class='icon-github'></i> <span>Commit to GitHub</span></a>
+            <input id="commit" type="text" class='pull-left span8' placeholder="Commit from RuralCloud"/>
+            <a id="github-button" class="btn pull-right" ><i class='icon-github'></i> <span>Commit to GitHub</span></a><input type='hidden' id='branches' class="select2">
             <div id="commit-response" class='warning'></div>
+            <div>
+              <input type='hidden' id='commits' class="select2 span8 pull-left">
+              <span id='github-pull'></span>
+            </div>
           </div>
         <% end %>
       <% end %>
@@ -86,7 +90,6 @@
   </div>
 </div>
 
-
 <script type="text/javascript">
 
   var editor = CodeMirror.fromTextArea(document.getElementById('editor'), {
@@ -104,7 +107,7 @@
   var currentline = 0;
   var cmd = "";
   var prompt = "$> ";
-
+  var commit_format = "{HH}:{mm}:{ss} - "
   function getCurLineLen(co) {
     return co.getLine(co.getCursor().line).length
   };
@@ -241,13 +244,44 @@
       $.post("/challenges/send_compile", {code: editor.getValue(), challenge: <%= @challenge.id %>, lines: editor.lineCount(), length: editor.getValue().length});
     }
   });
+  var opts;
+  var commits;
+
+  $.post('/challenges/get_repo_data', 
+    {challenge: <%= @challenge.id %>},
+    function(data) {
+      console.log(data);
+      if(data.error_message == null) {
+        opts = data.branches;
+        commits = data.commits;
+        for (var i = commits.length - 1; i >= 0; i--) {
+          var time = Date.utc.create(commits[i].time);
+          commits[i].text = time.format(commit_format) + commits[i].text
+        };
+        $('#github-pull').append('<a id="github-pull-button" class="btn pull-right" ><i class="icon-github"></i> <span>Pull from GitHub</span></a>');
+        $('#github-pull-button').click(function(){githubpull();});
+        makebranchselect();
+        makecommitselect();
+      }
+  });
 
   $("#github-button").click(function(){
+    var branch_name = opts[$('#branches').val()] ? opts[$('#branches').val()].text : $('#branches').val();
     $.post("/challenges/push_github",
-      {input: editor.getValue(), challenge: <%= @challenge.id %>, message: $('#commit').val()},function(data) {
-        if(data === null) {
-          $("#commit-response").text(data.message);
+      {input: editor.getValue(), challenge: <%= @challenge.id %>, message: $('#commit').val(), branch: branch_name},function(data) {
+        if(!(data.error_message == null)) {
+          $("#commit-response").text(data.error_message);
         } else {
+          $("#commit-response").text("");
+          if(!(data.branch == null)) {
+            opts.push({id: opts.length, text: data.branch});
+            $('#branches').select2('destroy');
+            makebranchselect();
+          }
+          var time = Date.utc.create(data.time);
+          commits.unshift({'id': data.sha, 'text': time.format(commit_format) +data.message});
+          $('#commits').select2('destroy');
+          $('#commits').select2({data: commits});
           $("#github-button span").text("Committed!");
           window.setTimeout(function () {
             $("#github-button span").html('Commit to GitHub');
@@ -256,6 +290,17 @@
       }
       ,"json")}
     );
+
+
+  function githubpull() {
+    $.post("/challenges/pull_github",
+      {sha: $("#commits").select2('data').id, challenge: <%= @challenge.id %>},
+      function(data) {
+        console.log(data);
+        editor.setValue(data.code);
+      }
+      ,"json")
+  }
 
   $('#error-button').click(function() {
     $.post("/challenges/report_error", {id: <%= @challenge.id %>, sender: '<%= username_or_email(current_user.id) %>' , message: $('#message-box').val()});
@@ -308,5 +353,21 @@
     $("#submit-button").html("You've submitted!");
     $("#submit-button").attr("disabled", "disabled");
   <% end %>
+
+  function makebranchselect() {
+    $('#branches').select2({
+      createSearchChoice:function(term, data) { 
+        if ($(data).filter(function() { return this.text.localeCompare(term)===0; }).length===0) {return {id:term, text:term};} },
+        multiple: false,
+        data: opts
+    });
+    $('#branches').select2('data', {text: 'master'});
+  }
+
+function makecommitselect() {
+  $('#commits').select2({data: commits});
+  $('#commits').select2('data', commits[0]);
+}
+
 
 </script>

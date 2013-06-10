@@ -24,6 +24,7 @@
 //= require bootstrap-notify
 //= require sync
 //= require jquery_nested_form
+//= require select2.min
 
 function remove_fields(link) {
   $(link).prev("input[type=hidden]").val("1");

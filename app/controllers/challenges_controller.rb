@@ -174,7 +174,7 @@ class ChallengesController < ApplicationController
   def username_or_email id
     user = User.find(id)
 
-    user.username.blank? ? sanitize(user.email) : user.username
+    user.username.blank? ? ActionController::Base.helpers.sanitize(user.email) : user.username
   end
 
   def global_leaderboard
@@ -373,27 +373,79 @@ class ChallengesController < ApplicationController
       entry = get_entry(params[:challenge])
       cur_challenge = Challenge.find(params[:challenge])
       client = Octokit::Client.new(:login => "current_user.email", :oauth_token => current_user.github_id)
-      message = params[:message] || "Commit from RuralCloud"
+      message = params[:message].presence || "Commit from RuralCloud"
       if(params[:input])
         commit = nil
+        jsonresponse = {}
         filename = "#{cur_challenge.description}.hs".to_uri
         file = params[:input]<<"\n"
         unless(entry.github_repo)
           repo = client.create_repository(cur_challenge.description, {:description => "RuralCloud", :auto_init => true, :gitignore_template => "Haskell"})
           entry.update_attribute("github_repo", repo.url[29, repo.url.length])
-          commit = client.add_content(entry.github_repo, filename, message, file, :branch => "master")
+          commit = client.add_content(entry.github_repo, filename, message, file, params[:branch])
+          ghbranch = GhBranch.new(:branch => params[:branch], :file_hash => commit[:content].sha, :entry_id => entry.id)
+          ghbranch.save
         else
-          commit = client.update_content(entry.github_repo, filename, message, entry.file_hash, file, :branch => "master")
+          if(GhBranch.exists?(:branch => params[:branch]))
+            ghbranch = GhBranch.where(:branch => params[:branch], :entry_id => entry.id).first
+            commit = client.update_content(entry.github_repo, filename, message, ghbranch.file_hash, file, :branch => ghbranch.branch)
+            ghbranch.update_attribute('file_hash', commit[:content].sha)
+          else
+            ghbranch = GhBranch.last
+            oldcommit = client.branch(entry.github_repo, "master")
+            client.create_ref(entry.github_repo, "heads/#{params[:branch]}", oldcommit[:commit].sha)
+            commit = client.update_content(entry.github_repo, filename, message, ghbranch.file_hash, file, :branch => params[:branch])
+            newbranch = GhBranch.new(:branch => params[:branch], :file_hash => commit[:content].sha, :entry_id => entry.id)
+            newbranch.save
+            jsonresponse.merge!({:branch => newbranch.branch})
+          end
         end
-        entry.update_attribute('file_hash', commit[:content].sha)
+        branchname = /https:\/\/api\.github\.com\/repos.*\?ref=(.*)/.match(commit.content.url).captures[0]
+        jsonresponse.merge!({:time => commit.commit.author.date, :message => commit.commit.message, :sha => commit.commit.sha})
       end
-      render :nothing => true
     rescue
-      fail = {:message => "Commit failed. Try again or see if you have a repo already called #{cur_challenge.description}."}
-      render :json => fail
+      jsonresponse.merge!({:error_message => "Commit failed. Try again or see if you have a repo already called #{cur_challenge.description}."})
     end
+    render :json => jsonresponse
   end
   helper_method :push_github
+
+  def pull_github
+    jsonresponse = {}
+    begin
+      entry = get_entry(params[:challenge])
+      client = Octokit::Client.new(:login => "current_user.email", :oauth_token => current_user.github_id)
+      code = open(client.commit(entry.github_repo, params[:sha]).files.first.raw_url).read
+      jsonresponse.merge!({:code => code})
+    rescue
+     jsonresponse.merge!({:fail => 'Fail'})
+    end
+    render :json => jsonresponse
+  end
+
+  def get_repo_data
+    entry = get_entry(params[:challenge])
+    commits = []
+    branch_names = []
+    jsonresponse = {}
+    begin
+      if(entry.github_repo)
+        branches = Octokit.branches(entry.github_repo)
+        branches.each do |branch|
+          branch_names.push({:id => branch_names.length, :text => branch.name})
+          branch_commits = Octokit.commits(entry.github_repo, branch.name)
+          branch_commits.each do |commit|
+            info = {id: commit.sha, :time => commit.commit.author.date, :text => commit.commit.message}
+            commits.push(info)
+          end
+          jsonresponse.merge!({:branches => branch_names, :commits => commits})
+        end
+      end
+    rescue
+      jsonresponse.merge!({:error_message => 'Github error - try again later.'})
+    end
+    render :json => jsonresponse
+  end
 
   private
     def is_entered challenge
