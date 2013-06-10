@@ -250,7 +250,6 @@
   $.post('/challenges/get_repo_data', 
     {challenge: <%= @challenge.id %>},
     function(data) {
-      console.log(data);
       if(data.error_message == null) {
         opts = data.branches;
         commits = data.commits;
