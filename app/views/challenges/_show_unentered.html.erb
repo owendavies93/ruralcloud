@@ -90,9 +90,9 @@
         categories: [
           <% @challenge.users.order("id asc").each do |user| %>
             <% if user != @challenge.users.last %>
-              '<%= sanitize user.email %>',
+              '<%= username_or_email user %>',
             <% else %>
-              '<%= sanitize user.email %>'
+              '<%= username_or_email user %>'
             <% end %>
           <% end %>
         ]

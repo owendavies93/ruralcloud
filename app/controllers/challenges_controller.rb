@@ -116,6 +116,8 @@ class ChallengesController < ApplicationController
 
     @challenge.update_attribute("total_tests", @challenge.challenge_tests.count)
 
+    sync @challenge, :update
+
     respond_to do |format|
       if @challenge.update_attributes(params[:challenge])
         sync @challenge, :update
@@ -152,6 +154,8 @@ class ChallengesController < ApplicationController
         Pusher['private-' + u.id.to_s].trigger('new_entrant', {:entrant => username_or_email(current_user.id), :id => @challenge.id.to_s})
       end
     end
+
+    sync @challenge, :update
 
     @owner = User.find(id_from_uoe @challenge.owner)
     Pusher['private-' + @owner.id.to_s].trigger('admin_entrant', {:entrant => username_or_email(current_user.id), :id => @challenge.id.to_s})
