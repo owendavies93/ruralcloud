@@ -25,6 +25,7 @@
 //= require sync
 //= require jquery_nested_form
 //= require select2.min
+//= require jquery.blockUI
 
 function remove_fields(link) {
   $(link).prev("input[type=hidden]").val("1");

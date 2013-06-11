@@ -411,14 +411,18 @@ class ChallengesController < ApplicationController
   helper_method :push_github
 
   def pull_github
+    entry = get_entry(params[:challenge])
     jsonresponse = {}
-    begin
-      entry = get_entry(params[:challenge])
-      client = Octokit::Client.new(:login => "current_user.email", :oauth_token => current_user.github_id)
-      code = open(client.commit(entry.github_repo, params[:sha]).files.first.raw_url).read
-      jsonresponse.merge!({:code => code})
-    rescue
-     jsonresponse.merge!({:fail => 'Fail'})
+    if(entry.github_repo)
+      begin
+        client = Octokit::Client.new(:login => "current_user.email", :oauth_token => current_user.github_id)
+        code = open(client.commit(entry.github_repo, params[:sha]).files.first.raw_url).read
+        jsonresponse.merge!({:code => code})
+      rescue
+       jsonresponse.merge!({:error_message => 'Failed to recieve GitHub data - doea the repo exist?'})
+      end
+    else
+      jsonresponse.merge!({:error_message => 'Please commit first!'})
     end
     render :json => jsonresponse
   end
@@ -440,6 +444,8 @@ class ChallengesController < ApplicationController
           end
           jsonresponse.merge!({:branches => branch_names, :commits => commits})
         end
+      else
+        jsonresponse.merge!({:branches => ['master'], :commits => []})
       end
     rescue
       jsonresponse.merge!({:error_message => 'Github error - try again later.'})
