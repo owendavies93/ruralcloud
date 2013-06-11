@@ -104,9 +104,6 @@ body #user-modal {
   left: 25%; /* (100%-width)/2 */
   margin: auto auto auto auto; /* place center */
 }
-body #user-modal.fade.in {
-  top: auto; /* fade in to correct spot */
-}
 
 .my-carousel {
   margin-bottom: 60px;

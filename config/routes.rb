@@ -2,6 +2,11 @@ Ruralcloud::Application.routes.draw do
   # auto routing for standard challenge operations
   resources :challenges
 
+  # errors
+  match "/404", :to => "errors#four_oh_four"
+
+  match "/500", :to => "errors#five_hundred"
+
   # extra route for adding user to challenge
   match "/challenges/enter/:id" => "challenges#enter", :as => :enter_challenge
 
