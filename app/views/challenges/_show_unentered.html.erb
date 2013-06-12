@@ -1,8 +1,10 @@
 <% started = has_started(@challenge)
    ended = has_ended(@challenge) %>
 
-<% if started %>
-  <p>Administration Panel</p>
+<% if user_signed_in? %>
+  <% if started && username_or_email(current_user.id) == @challenge.owner %>
+    <p>Administration Panel</p>
+  <% end %>
 <% end %>
 <div class="row-fluid admin-panel">
 <div class="span4">
@@ -27,7 +29,7 @@
     <%= link_to 'Edit', edit_challenge_path(@challenge), :class => "btn" %>
   <% elsif !started %>
     <%= link_to 'Enter Challenge', enter_challenge_path, :class => "btn" %>
-  <% else %>
+  <% elsif username_or_email(current_user.id) == @challenge.owner %>
     <div id="start-countdown"></div>
     <div id="chart"></div>
     <div class="center">
@@ -43,156 +45,149 @@
   <% end %>
 <% elsif !started %>
   <p>Sign in to enter this challenge!</p>
-<% else %>
-  <div id="start-countdown"></div>
-  <div id="chart"></div>
-  <div class="center">
-    <div class="btn-group center">
-      <a class="btn btn-mini" id="backward-button">
-        <i class="icon-chevron-left"></i>
-      </a>
-      <a class="btn btn-mini" id="forward-button">
-        <i class="icon-chevron-right"></i>
-      </a>
+<% end %>
+
+</div>
+
+<% if user_signed_in? %>
+  <% if started && username_or_email(current_user.id) == @challenge.owner %>
+    <div class="span4 well well-small log" id="challenge-log" style="font-family: 'Inconsolata', monospace">
+      <%= simple_format(@challenge.log) %>
     </div>
-  </div>
-<% end %>
-
-</div>
-
-<% if started %>
-  <div class="span4 well well-small log" id="challenge-log" style="font-family: 'Inconsolata', monospace">
-    <%= simple_format(@challenge.log) %>
-  </div>
-  <div class="span4 log">
-    <h4>Entrants:</h4>
-    <% @entries.each do |entry| %>
-      <%= sync partial: 'challenge_entry', resource: entry %>
-    <% end %>
-  </div>
-<% end %>
-</div>
-
-<script type="text/javascript">
-  var dataSets = [<%= @comp %>, <%= @f_comp %>, <%= @eval %>, <%= @f_eval %>, <%= @length %>, <%= @lines %>],
-      titles = ['Compilations', 'Failed Compilations', 'Evaluations', 'Failed Evaluations', 'Code Length', 'Lines'],
-      currentSet = 0,
-      chart;
-
-  $(function () {
-    chart = new Highcharts.Chart({
-      chart: {
-        renderTo: 'chart',
-        type: 'column'
-      },
-      title: { text: '' },
-      xAxis: {
-        categories: [
-          <% @challenge.users.order("id asc").each do |user| %>
-            <% if user != @challenge.users.last %>
-              '<%= username_or_email user %>',
-            <% else %>
-              '<%= username_or_email user %>'
-            <% end %>
-          <% end %>
-        ]
-        <% if @entries.length > 3 %>
-          ,
-          labels: {
-            rotation: -45,
-            align: 'right'
-          }
-        <% end %>
-      },
-      yAxis: {
-        title: { text: titles[0] },
-        type: 'integer'
-      },
-      series: [{
-        showInLegend: false,
-        name: titles[0],
-        data: dataSets[0]
-      }],
-      credits: {
-        enabled: true
-      },
-    });
-  });
-
-  $('#forward-button').click(function() {
-    if (currentSet == dataSets.length - 1) {
-      currentSet = 0;
-      chart.yAxis[0].axisTitle.attr({text: titles[0]});
-      chart.series[0].remove();
-      chart.addSeries({
-        color: "#2f7ed8",
-        showInLegend: false,
-        name: titles[0],
-        data: dataSets[0]
-      });
-    } else {
-      chart.yAxis[0].axisTitle.attr({text: titles[++currentSet]});
-      chart.series[0].remove();
-      chart.addSeries({
-        color: "#2f7ed8",
-        showInLegend: false,
-        name: titles[currentSet],
-        data: dataSets[currentSet]
-      });
-    }
-  });
-
-  $('#backward-button').click(function() {
-    if (currentSet == 0) {
-      currentSet = dataSets.length - 1;
-      chart.yAxis[0].axisTitle.attr({text: titles[dataSets.length - 1]});
-      chart.series[0].remove();
-      chart.addSeries({
-        color: "#2f7ed8",
-        showInLegend: false,
-        name: titles[dataSets.length - 1],
-        data: dataSets[dataSets.length - 1]
-      });
-    } else {
-      chart.yAxis[0].axisTitle.attr({text: titles[--currentSet]});
-      chart.series[0].remove();
-      chart.addSeries({
-        color: "#2f7ed8",
-        showInLegend: false,
-        name: titles[currentSet],
-        data: dataSets[currentSet]
-      });
-    }
-  });
-
-  <% if started %>
-    <% now = Time.new %>
-    var endtime = <%= @challenge.endtime.minus_with_coercion(now + 1.hour) %>;
-    $("#start-countdown").countdown({until: endtime});
-
-    var challenge_channel = pusher.subscribe('challenge-<%= @challenge.id %>');
-    challenge_channel.bind('update_graphs', function(d) {
-      dataSets = [d.comp, d.f_comp, d.eval, d.f_eval, d.length, d.lines];
-      chart.series[0].setData(dataSets[currentSet]);
-      $('#challenge-log').html(simpleFormat(d.log));
-    });
-
-    setTimeout(function() {
-      $.post("/challenges/run_tests", {challenge: <%= @challenge.id %>});
-      $("#started-notice").text("");
-      $("#ended-notice").text("This challenge has ended!");
-    }, endtime * 1000);
-
-    function simpleFormat(str) {
-      str = str.replace(/\r\n?/, "\n");
-      str = $.trim(str);
-      if (str.length > 0) {
-        str = str.replace(/\n\n+/g, '</p><p>');
-        str = str.replace(/\n/g, '<br />');
-        str = '<p>' + str + '</p>';
-      }
-      return str;
-    }
+    <div class="span4 log">
+      <h4>Entrants:</h4>
+      <% @entries.each do |entry| %>
+        <%= sync partial: 'challenge_entry', resource: entry %>
+      <% end %>
+    </div>
   <% end %>
+<% end %>
+</div>
 
-</script>
+<% if user_signed_in? %>
+  <% if started && username_or_email(current_user.id) == @challenge.owner %>
+    <script type="text/javascript">
+      var dataSets = [<%= @comp %>, <%= @f_comp %>, <%= @eval %>, <%= @f_eval %>, <%= @length %>, <%= @lines %>],
+          titles = ['Compilations', 'Failed Compilations', 'Evaluations', 'Failed Evaluations', 'Code Length', 'Lines'],
+          currentSet = 0,
+          chart;
+
+      $(function () {
+        chart = new Highcharts.Chart({
+          chart: {
+            renderTo: 'chart',
+            type: 'column'
+          },
+          title: { text: '' },
+          xAxis: {
+            categories: [
+              <% @challenge.users.order("id asc").each do |user| %>
+                <% if user != @challenge.users.last %>
+                  '<%= username_or_email user %>',
+                <% else %>
+                  '<%= username_or_email user %>'
+                <% end %>
+              <% end %>
+            ]
+            <% if @entries.length > 3 %>
+              ,
+              labels: {
+                rotation: -45,
+                align: 'right'
+              }
+            <% end %>
+          },
+          yAxis: {
+            title: { text: titles[0] },
+            type: 'integer'
+          },
+          series: [{
+            showInLegend: false,
+            name: titles[0],
+            data: dataSets[0]
+          }],
+          credits: {
+            enabled: true
+          },
+        });
+      });
+
+      $('#forward-button').click(function() {
+        if (currentSet == dataSets.length - 1) {
+          currentSet = 0;
+          chart.yAxis[0].axisTitle.attr({text: titles[0]});
+          chart.series[0].remove();
+          chart.addSeries({
+            color: "#2f7ed8",
+            showInLegend: false,
+            name: titles[0],
+            data: dataSets[0]
+          });
+        } else {
+          chart.yAxis[0].axisTitle.attr({text: titles[++currentSet]});
+          chart.series[0].remove();
+          chart.addSeries({
+            color: "#2f7ed8",
+            showInLegend: false,
+            name: titles[currentSet],
+            data: dataSets[currentSet]
+          });
+        }
+      });
+
+      $('#backward-button').click(function() {
+        if (currentSet == 0) {
+          currentSet = dataSets.length - 1;
+          chart.yAxis[0].axisTitle.attr({text: titles[dataSets.length - 1]});
+          chart.series[0].remove();
+          chart.addSeries({
+            color: "#2f7ed8",
+            showInLegend: false,
+            name: titles[dataSets.length - 1],
+            data: dataSets[dataSets.length - 1]
+          });
+        } else {
+          chart.yAxis[0].axisTitle.attr({text: titles[--currentSet]});
+          chart.series[0].remove();
+          chart.addSeries({
+            color: "#2f7ed8",
+            showInLegend: false,
+            name: titles[currentSet],
+            data: dataSets[currentSet]
+          });
+        }
+      });
+
+      <% if started %>
+        <% now = Time.new %>
+        var endtime = <%= @challenge.endtime.minus_with_coercion(now + 1.hour) %>;
+        $("#start-countdown").countdown({until: endtime});
+
+        var challenge_channel = pusher.subscribe('challenge-<%= @challenge.id %>');
+        challenge_channel.bind('update_graphs', function(d) {
+          dataSets = [d.comp, d.f_comp, d.eval, d.f_eval, d.length, d.lines];
+          chart.series[0].setData(dataSets[currentSet]);
+          $('#challenge-log').html(simpleFormat(d.log));
+        });
+
+        setTimeout(function() {
+          $.post("/challenges/run_tests", {challenge: <%= @challenge.id %>});
+          $("#started-notice").text("");
+          $("#ended-notice").text("This challenge has ended!");
+        }, endtime * 1000);
+
+        function simpleFormat(str) {
+          str = str.replace(/\r\n?/, "\n");
+          str = $.trim(str);
+          if (str.length > 0) {
+            str = str.replace(/\n\n+/g, '</p><p>');
+            str = str.replace(/\n/g, '<br />');
+            str = '<p>' + str + '</p>';
+          }
+          return str;
+        }
+      <% end %>
+
+    </script>
+  <% end %>
+<% end %>
