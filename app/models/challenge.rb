@@ -13,25 +13,25 @@ class Challenge < ActiveRecord::Base
 
   def not_in_past
     if !starttime.blank? and starttime < DateTime.now
-      errors.add(:starttime, "Start time can't be in the past")
+      errors.add(:starttime, "can't be in the past")
     end
     if !endtime.blank? and endtime < DateTime.now
-      errors.add(:endtime, "End time can't be in the past")
+      errors.add(:endtime, "can't be in the past")
     end
   end
 
   def later_than_start
     if !starttime.blank? and !endtime.blank? and starttime >= endtime
-      errors.add(:endtime, "Start time can't be after or equal to end time")
+      errors.add(:endtime, "can't be after or equal to end time")
     end
   end
 
   def not_invalid
     if starttime == nil
-      errors.add(:starttime, "Start time supplied was not valid")
+      errors.add(:starttime, "supplied was not valid")
     end
     if endtime == nil
-      errors.add(:endtime, "End time supplied was not valid")
+      errors.add(:endtime, "supplied was not valid")
     end
   end
 end

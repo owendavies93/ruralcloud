@@ -4,8 +4,8 @@
       <h3><%= pluralize(@challenge.errors.count, "error") %> prohibited this challenge from being saved:</h3>
 
       <ul>
-      <% @challenge.errors.messages.values.each do |msg| %>
-        <li><%= msg[0] %></li>
+      <% @challenge.errors.full_messages.each do |msg| %>
+        <li><%= msg %></li>
       <% end %>
       </ul>
     </div>
