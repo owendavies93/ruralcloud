@@ -281,7 +281,7 @@ class ChallengesController < ApplicationController
     sync @entry, :update
 
     Rabbitq::Client::publish("", self, 1, params[:code], params[:challenge], current_user.id)
-    throw :async
+    render :nothing => true, :status => 200
   end
 
   def send_eval
@@ -291,7 +291,7 @@ class ChallengesController < ApplicationController
     sync @entry, :update
 
     Rabbitq::Client::publish(params[:input], self, 0, @entry.last_code, params[:challenge], current_user.id)
-    throw :async
+    render :nothing => true, :status => 200
   end
 
   def run_tests
@@ -304,7 +304,7 @@ class ChallengesController < ApplicationController
         Rabbitq::Client::publish("", self, 2, @entry.last_code, params[:challenge], u.id)
       end
     end
-    throw :async
+    render :nothing => true, :status => 200
   end
 
   def call(result, challenge)
