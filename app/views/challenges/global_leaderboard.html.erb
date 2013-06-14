@@ -24,7 +24,7 @@
       <td><%= entry.failed_eval %></td>
       <td><%= entry.av_length %></td>
       <td><%= entry.av_lines %></td>
-      <td><%= entry.total_score %> / <%= @possible_scores.values.map { |a,b| a == entry.user_id ? [b] : [] }.flatten.first %></td>
+      <td><%= entry.total_score %> / <%= @possible_scores.values.map { |a,b| a == entry.user_id.to_s ? [b] : [] }.flatten.first %></td>
     </tr>
   <% end %>
 <% end %>
