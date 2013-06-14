@@ -39,7 +39,7 @@
 </div>
 
 View leaderboard for ended challenge:<br/>
-<%= select_tag "challenge_id", options_from_collection_for_select(@ended, 'id', 'id'), :include_blank => "" %>
+<%= select_tag "challenge_id", options_from_collection_for_select(@ended, 'id', 'description'), :include_blank => "" %>
 
 <script type="text/javascript">
   $(function(){
