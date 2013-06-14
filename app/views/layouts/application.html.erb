@@ -19,7 +19,11 @@
       <% end %>
 
       <% if user_signed_in? %>
-        var pusher = new Pusher('<%= Pusher.key %>');
+        <% if Rails.env.development? %>
+          var pusher = new Pusher('<%= Pusher.key %>');
+        <% else %>
+          var pusher = new Pusher('<%= Pusher.key %>', { encrypted: true });
+        <% end %>
         var user_channel = pusher.subscribe('private-<%= current_user.id %>');
 
         user_channel.bind('new_entrant', function(data) {
