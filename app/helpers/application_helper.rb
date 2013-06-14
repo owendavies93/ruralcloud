@@ -11,7 +11,7 @@ module ApplicationHelper
 
   def avatar user, size
     gravatar_id = Digest::MD5::hexdigest(user.email).downcase
-    "http://gravatar.com/avatar/#{gravatar_id}.png?s=#{size}&d=identicon"
+    "https://secure.gravatar.com/avatar/#{gravatar_id}.png?s=#{size}&d=identicon"
   end
 
   def link_to_remove_fields(name, f)
