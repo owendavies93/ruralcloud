@@ -103,15 +103,19 @@
 
   editor.setValue("<%= escape_javascript(get_entry(@challenge.id).last_code.html_safe) %>");
 
-  var used = new Array();
   var history = new Array();
   var currentline = 0;
   var cmd = "";
   var prompt = "$> ";
-  var commit_format = "{HH}:{mm}:{ss} - "
+  var commit_format = "{HH}:{mm}:{ss} - ";
+
   function getCurLineLen(co) {
-    return co.getLine(co.getCursor().line).length
+    return co.getLine(co.getCursor().line).length;
   };
+
+  function onLastLine(co) {
+    return co.getCursor().line == co.lastLine();
+  }
 
   var co = CodeMirror.fromTextArea(document.getElementById('console'), {
       mode: "shell",
@@ -121,7 +125,7 @@
       lineWrapping: true,
       extraKeys: {
         Enter: function(co) {
-          if ($.inArray(co.getCursor().line, used) == -1) {
+          if (onLastLine(co)) {
             co.setCursor({line: co.getCursor().line});
             co.setOption("readOnly", true);
             co.replaceSelection("\n", "end", "+input");
@@ -136,14 +140,14 @@
         // Intercept backspace and delete to stop old command deletion
         Backspace: function(co) {
           var cur = co.getCursor().line;
-          if ($.inArray(cur, used) == -1 && getCurLineLen(co) > 3) {
+          if (onLastLine(co) && getCurLineLen(co) > 3) {
             co.deleteH(-1, "char");
           }
         },
 
         Delete: function(co) {
           var cur = co.getCursor().line;
-          if ($.inArray(cur, used) == -1 && getCurLineLen(co) > 3) {
+          if (onLastLine(co) && getCurLineLen(co) > 3) {
             co.deleteH(1, "char");
           }
         },
@@ -159,18 +163,20 @@
         // Use up and down for command history
         Up: function(co) {
           var cur = co.getCursor().line;
-          if (currentline > 0) {
+          if (onLastLine(co) && currentline > 0) {
             co.setLine(cur, prompt + history[--currentline]);
           }
         },
 
         Down: function(co) {
           var cur = co.getCursor().line;
-          if (currentline < history.length - 1) {
-            co.setLine(cur, prompt + history[++currentline]);
-          } else if (currentline == history.length - 1) {
-            co.setLine(cur, prompt);
-            currentline++;
+          if (onLastLine(co)) {
+            if (currentline < history.length - 1) {
+              co.setLine(cur, prompt + history[++currentline]);
+            } else if (currentline == history.length - 1) {
+              co.setLine(cur, prompt);
+              currentline++;
+            }
           }
         }
       }
@@ -209,10 +215,6 @@
   user_channel.bind('remote-message', function(data) {
     res = JSON.parse(data.result);
 
-    // res.status:
-    //   -1 means server attack
-    //   0 means success
-    //   anything else means Haskell error
     if (res.isCompileJob) {
       var print = !res.status ? "Success!" : res.responseString;
       co.replaceSelection("\n" + print, "end", "+input");
@@ -223,13 +225,13 @@
     } else {
       co.setLine(co.lineCount() - 1, res.responseString);
       co.replaceSelection("\n" + prompt, "end", "+input");
-      // 'Mark' lines as uneditable
-      used.push(co.lineCount() - 2);
-      used.push(co.lineCount() - 3);
 
       // Add cmd to history
       history.push(cmd);
-      currentline++;
+      currentline = history.length;
+      console.log(history);
+      console.log(currentline);
+
       co.setOption("readOnly", false);
     }
   });
@@ -251,7 +253,7 @@
  <% if started && !ended %>
     <% if current_user.github_id%>
       $(function() {
-        $.post('/challenges/get_repo_data', 
+        $.post('/challenges/get_repo_data',
           {challenge: <%= @challenge.id %>},
           function(data) {
             if(data.error_message == null) {
@@ -374,7 +376,7 @@
 
   function makebranchselect() {
     $('#branches').select2({
-      createSearchChoice:function(term, data) { 
+      createSearchChoice:function(term, data) {
         if ($(data).filter(function() { return this.text.localeCompare(term)===0; }).length===0) {return {id:term, text:term};} },
         multiple: false,
         data: opts
