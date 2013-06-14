@@ -4,7 +4,6 @@
     <title><%= (yield(:title) + " - " unless yield(:title).blank?).to_s + "RuralCloud" %></title>
     <%= stylesheet_link_tag    "application", :media => "all" %>
     <%= javascript_include_tag "application" %>
-    <%= javascript_include_tag "https://d3dy5gmtp8yhk7.cloudfront.net/2.0/pusher.min.js" %>
     <%= javascript_include_tag Sync.adapter_javascript_url %>
     <%= csrf_meta_tags %>
     <link href='//fonts.googleapis.com/css?family=Inconsolata:400,700' rel='stylesheet' type='text/css'>
